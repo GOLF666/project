@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F5F8FF"
+    android:padding="20dp">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/title_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="28dp"
+        android:layout_marginTop="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        android:backgroundTint="#E3F2FD"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:gravity="center_horizontal">
+
+    <!-- 🩺 標題 -->
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🩺 健康分析"
+        android:textSize="26sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="#1565C0"
+        android:gravity="center" />
+    </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- 🔽 共用下拉樣式 -->
+    <!-- 使用者選擇 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/user_spinner_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:contentDescription="選擇使用者"
+        android:hint="選擇使用者"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        app:boxBackgroundColor="#FFFFFF"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:layout_constraintTop_toBottomOf="@id/title_card"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <AutoCompleteTextView
+            android:id="@+id/user_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:importantForAccessibility="no"
+            android:focusable="false"
+            android:clickable="true"
+            android:drawableEnd="@drawable/ic_arrow_drop_down"
+            android:padding="16dp"
+            android:backgroundTint="@android:color/transparent"
+            android:textColor="#000000"
+            android:minHeight="56dp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- 📅 日期 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/date_spinner_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:contentDescription="選擇日期區間"
+        android:hint="選擇日期區間"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        app:boxBackgroundColor="#FFFFFF"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:layout_constraintTop_toBottomOf="@id/user_spinner_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <AutoCompleteTextView
+            android:id="@+id/date_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:importantForAccessibility="no"
+            android:focusable="false"
+            android:clickable="true"
+            android:drawableEnd="@drawable/ic_arrow_drop_down"
+            android:padding="16dp"
+            android:backgroundTint="@android:color/transparent"
+            android:textColor="#000000"
+            android:minHeight="56dp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- 分析區間 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/range_spinner_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:contentDescription="選擇分析區間"
+        android:hint="選擇分析區間"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        app:boxBackgroundColor="#FFFFFF"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:layout_constraintTop_toBottomOf="@id/date_spinner_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <AutoCompleteTextView
+            android:id="@+id/range_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:importantForAccessibility="no"
+            android:focusable="false"
+            android:clickable="true"
+            android:drawableEnd="@drawable/ic_arrow_drop_down"
+            android:padding="16dp"
+            android:backgroundTint="@android:color/transparent"
+            android:textColor="#000000"
+            android:minHeight="56dp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- 疾病篩選 -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/disease_spinner_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:contentDescription="選擇疾病篩選條件"
+        android:hint="篩選疾病"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        app:boxBackgroundColor="#FFFFFF"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:layout_constraintTop_toBottomOf="@id/range_spinner_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <AutoCompleteTextView
+            android:id="@+id/disease_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:importantForAccessibility="no"
+            android:focusable="false"
+            android:clickable="true"
+            android:drawableEnd="@drawable/ic_arrow_drop_down"
+            android:padding="16dp"
+            android:backgroundTint="@android:color/transparent"
+            android:textColor="#000000"
+            android:minHeight="56dp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- 🔍 分析按鈕 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/analyze_btn"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="進行健康分析"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:fontFamily="sans-serif-medium"
+        app:cornerRadius="20dp"
+        app:elevation="6dp"
+        app:iconPadding="8dp"
+        app:layout_constraintTop_toBottomOf="@id/disease_spinner_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ⏳ 載入動畫 -->
+    <ProgressBar
+        android:id="@+id/loading_indicator"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="12dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/analyze_btn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 🔘 切換列 -->
+    <LinearLayout
+        android:id="@+id/switch_row"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/loading_indicator"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Switch
+            android:id="@+id/switch_toggle_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="圖表/分析"
+            android:textColor="#555555"
+            android:minHeight="48dp"
+            android:padding="8dp"
+            android:layout_marginEnd="12dp" />
+
+        <Switch
+            android:id="@+id/switch_show_details"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="細節"
+            android:textColor="#555555"
+            android:minHeight="48dp"
+            android:padding="8dp"
+            android:layout_marginEnd="12dp" />
+
+        <Switch
+            android:id="@+id/switch_expand_chart"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="放大"
+            android:minHeight="48dp"
+            android:padding="8dp"
+            android:textColor="#555555" />
+    </LinearLayout>
+
+    <!-- 📈 結果卡片 -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/result_card"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="8dp"
+        android:backgroundTint="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/switch_row"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/chart"
+                android:layout_width="0dp"
+                android:layout_height="330dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/scrollView"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <ScrollView
+                android:id="@+id/scrollView"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:paddingBottom="12dp"
+                app:layout_constraintTop_toBottomOf="@id/chart"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    android:id="@+id/result_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="24dp"
+                    android:textSize="16sp"
+                    android:textColor="#444444"
+                    android:lineSpacingExtra="8dp"
+                    android:textStyle="normal"
+                    android:fontFamily="sans-serif"
+                    android:text="分析結果將顯示於此\n\n🟢 正常：目前無明顯異常指標\n🟡 中風險：部分數值偏高，建議追蹤\n🔴 高風險：需注意高血壓／心臟負荷問題" />
+            </ScrollView>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

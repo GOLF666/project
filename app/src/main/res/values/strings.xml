@@ -1,0 +1,89 @@
+<resources>
+    <string name="app_name">BeWell</string>
+
+
+    <!--  標題  -->
+    <string name="title_select_condition">請選擇您的病症：</string>
+    <!--  分段標題  -->
+    <string name="blood_pressure_title">血壓狀況</string>
+    <string name="weight_title">體重狀況</string>
+    <!--  病症  -->
+    <string name="high_blood_pressure">高血壓</string>
+    <string name="low_blood_pressure">低血壓</string>
+    <string name="overweight">體重過重</string>
+    <string name="underweight">體重過輕</string>
+    <string name="high_pulse">脈搏太高</string>
+    <string name="low_pulse">脈搏太低</string>
+    <!--  按鈕與預設文字  -->
+    <string name="get_exercise_advice">取得運動建議</string>
+    <string name="exercise_result_default">請選擇病症並點擊「取得運動建議」</string>
+
+    <!-- ✅ 首次輸入畫面 Header -->
+    <string name="header_instruction">在使用前，我們需要知道一些基本資料</string>
+    <string name="header_hint">請務必真實填寫喔～</string>
+
+    <!-- ✅ 表單欄位標題 -->
+    <string name="label_gender">性別</string>
+    <string name="label_height">身高</string>
+    <string name="label_age">年齡</string>
+
+    <!-- ✅ 輸入提示 -->
+    <string name="hint_height">請輸入身高（cm）</string>
+    <string name="hint_age">請輸入年齡</string>
+
+    <!-- ✅ 性別選擇 -->
+    <string name="gender_male">男</string>
+    <string name="gender_female">女</string>
+
+    <!-- ✅ 單位 -->
+    <string name="unit_cm">cm</string>
+    <string name="unit_age">歲</string>
+
+    <!-- ✅ 錯誤提示 -->
+    <string name="error_gender_required">請選擇性別！</string>
+    <string name="error_height_required">請輸入或選擇身高</string>
+    <string name="error_age_required">請輸入或選擇年齡</string>
+
+    <!-- ✅ 按鈕文字 -->
+    <string name="btn_next">下一步</string>
+    <string name="btn_prev">上一步</string>
+    <string name="btn_finish">完成</string>
+    <string name="btn_cancel">取消</string>
+
+    <!-- ✅ 使用者資訊 -->
+    <string name="label_user_info">使用者：%1$s｜性別：%2$s｜年齡：%3$d｜身高：%4$.1fcm</string>
+    <string name="label_weight">%.1f 公斤</string>
+
+    <!-- ✅ BLE 狀態 -->
+    <string name="msg_connecting">找到體重計，連線中…</string>
+    <string name="msg_connected">已連線，準備讀取資料…</string>
+    <string name="msg_disconnected">連線中斷，重試掃描…</string>
+    <string name="msg_scan">掃描中…</string>
+    <string name="msg_no_ble_permission">沒有掃描權限</string>
+    <string name="msg_data_receiving">資料接收中…</string>
+    <string name="msg_measuring_done">測量完成</string>
+    <string name="permission_denied_msg">未授權藍牙或定位權限，無法使用</string>
+
+    <!-- ✅ 上傳狀態 -->
+    <string name="msg_upload_success">✅ 上傳成功</string>
+    <string name="msg_upload_fail">❌ 上傳失敗：%1$s</string>
+    <string name="msg_upload_error">❌ 上傳錯誤：%1$s</string>
+
+    <!-- ✅ 空字串保留 -->
+    <string name="empty"></string>
+
+    <string name="step_gender">1 / 3</string>
+    <string name="step_height">2 / 3</string>
+    <string name="step_age">3 / 3</string>
+
+    <string name="username_label">使用者：</string>
+
+    <string name="selected_date">2025/05/25</string>
+    <string name="prev">⬅</string>
+    <string name="next">⮕</string>
+    <string name="week">週</string>
+    <string name="month">月</string>
+    <string name="year">年</string>
+
+    <string name="date_record_label">%1$s 的測量紀錄</string>
+</resources>

@@ -1,0 +1,43 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF">
+
+    <!-- 🔙 返回按鈕區域（48dp 高度）-->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:padding="8dp">
+
+        <ImageButton
+            android:id="@+id/btnCloseDialog"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="end|center_vertical"
+            android:padding="4dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_arrow_back"
+            android:scaleType="fitCenter"
+            android:contentDescription="返回" />
+    </FrameLayout>
+
+    <!-- 👤 個人資訊 -->
+    <TextView
+        android:id="@+id/user_info_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp"
+        android:text="👤 小建｜身高：170cm｜體重：71.5kg｜BMI：24.7"
+        android:textColor="#444"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:background="#F8F8F8"/>
+
+    <!-- 📈 圖表最大化佔比 -->
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/dialog_chart"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+</LinearLayout>

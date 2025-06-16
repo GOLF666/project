@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/rootLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="#FAFAFA">
+
+    <!-- 日期區間顯示 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp"
+        android:background="#E3F2FD"
+        android:padding="12dp"
+        android:elevation="2dp">
+
+        <Button
+            android:id="@+id/btnPrev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="←"
+            android:backgroundTint="#2196F3"
+            android:textColor="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/tvSelectedDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="請選擇日期"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:textColor="#000000"
+            android:paddingHorizontal="12dp" />
+
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="→"
+            android:backgroundTint="#2196F3"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+
+    <!-- 查詢模式切換 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="12dp"
+        android:layout_marginTop="4dp">
+
+        <Button
+            android:id="@+id/btnWeek"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="週"
+            android:backgroundTint="#BBDEFB"
+            android:textColor="#0D47A1"
+            android:textStyle="bold"
+            android:layout_marginEnd="6dp"/>
+
+        <Button
+            android:id="@+id/btnMonth"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="月"
+            android:backgroundTint="#BBDEFB"
+            android:textColor="#0D47A1"
+            android:textStyle="bold"
+            android:layout_marginHorizontal="6dp"/>
+
+        <Button
+            android:id="@+id/btnYear"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="年"
+            android:backgroundTint="#BBDEFB"
+            android:textColor="#0D47A1"
+            android:textStyle="bold"
+            android:layout_marginStart="6dp"/>
+    </LinearLayout>
+
+    <!-- 日期選擇器 -->
+    <Button
+        android:id="@+id/btnPickDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="📆 選擇特定日期"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp"
+        android:elevation="2dp"
+        android:padding="12dp" />
+
+    <!-- 歷史紀錄 RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerHistory"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="#FFFFFF"
+        android:padding="8dp"
+        android:contentDescription="歷史紀錄"
+        android:clipToPadding="false"
+        android:elevation="1dp" />
+</LinearLayout>

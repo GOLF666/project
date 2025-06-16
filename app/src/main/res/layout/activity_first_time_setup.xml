@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAFAFA"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="在使用前，我們需要知道一些基本資料"
+            android:textColor="#222222"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="請務必真實填寫喔～"
+            android:textColor="#D32F2F"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#CCCCCC"
+            android:layout_marginBottom="20dp" />
+
+        <!-- 性別選擇 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="請選擇您的性別"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="12dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <ImageButton
+                android:id="@+id/btnMale"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/bg_gender_unselected"
+                android:src="@drawable/ic_male"
+                android:contentDescription="男"
+                android:padding="8dp"
+                android:elevation="4dp" />
+
+            <ImageButton
+                android:id="@+id/btnFemale"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/bg_gender_unselected"
+                android:src="@drawable/ic_female"
+                android:contentDescription="女"
+                android:layout_marginStart="20dp"
+                android:padding="8dp"
+                android:elevation="4dp"/>
+        </LinearLayout>
+
+        <!-- 身高 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="請選擇您的身高"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"/>
+
+        <AutoCompleteTextView
+            android:id="@+id/editHeight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="選擇身高 (cm)"
+            android:background="@drawable/bg_edittext"
+            android:inputType="number"
+            android:drawableEnd="@drawable/ic_dropdown"
+            android:padding="14dp"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 年齡 -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="請選擇您的年齡"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <AutoCompleteTextView
+            android:id="@+id/editAge"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="選擇年齡"
+            android:background="@drawable/bg_edittext"
+            android:inputType="number"
+            android:drawableEnd="@drawable/ic_dropdown"
+            android:padding="14dp"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- 警告提示 -->
+        <TextView
+            android:id="@+id/tvRequired"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#FFA000"
+            android:layout_marginBottom="12dp"
+            android:textSize="14sp"/>
+
+        <!-- 完成按鈕 -->
+        <Button
+            android:id="@+id/btnComplete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="完成"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_primary_button"
+            android:textColor="@android:color/white"
+            android:padding="14dp"
+            android:elevation="2dp"/>
+    </LinearLayout>
+</ScrollView>

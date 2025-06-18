@@ -22,7 +22,7 @@ object RetrofitClient {
         .build()
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://10.11.246.191:3000/")
+        .baseUrl("http://192.168.0.10:3000/")
         .client(client)  // <- 关键，指定自定义的 OkHttpClient
         .addConverterFactory(GsonConverterFactory.create())
         .build()

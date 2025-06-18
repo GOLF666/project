@@ -210,6 +210,7 @@
         android:orientation="horizontal"
         android:layout_marginTop="16dp"
         android:gravity="center"
+        android:layout_marginBottom="4dp"
         app:layout_constraintTop_toBottomOf="@id/loading_indicator"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -244,6 +245,23 @@
             android:textColor="#555555" />
     </LinearLayout>
 
+    <!-- ✅ 新增標題：健康指標趨勢圖 -->
+    <TextView
+        android:id="@+id/chart_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="📈 健康指標趨勢圖"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="4dp"
+        app:layout_constraintTop_toBottomOf="@id/switch_row"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+
     <!-- 📈 結果卡片 -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/result_card"
@@ -253,7 +271,7 @@
         app:cardCornerRadius="20dp"
         app:cardElevation="8dp"
         android:backgroundTint="#FFFFFF"
-        app:layout_constraintTop_toBottomOf="@id/switch_row"
+        app:layout_constraintTop_toBottomOf="@id/chart_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent">
@@ -265,7 +283,7 @@
             <com.github.mikephil.charting.charts.LineChart
                 android:id="@+id/chart"
                 android:layout_width="0dp"
-                android:layout_height="330dp"
+                android:layout_height="295dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="8dp"
                 android:visibility="gone"

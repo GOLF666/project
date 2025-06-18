@@ -132,7 +132,7 @@ class MainActivity1 : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_health_analysis)
-        // 初始化元件及設定邏輯
+
         bindViews()
         setupRetrofit()
         setupSpinners()
@@ -140,12 +140,10 @@ class MainActivity1 : AppCompatActivity() {
 
         loadUsersFromServer()
 
-        val expandSwitch = findViewById<Switch>(R.id.switch_expand_chart)
-        expandSwitch.setOnCheckedChangeListener { _, isChecked ->
+        findViewById<Switch>(R.id.switch_expand_chart).setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 Toast.makeText(this, "🔍 放大中...", Toast.LENGTH_SHORT).show()
                 showChartInDialog()
-                expandSwitch.isChecked = false
             }
         }
     }
@@ -165,7 +163,7 @@ class MainActivity1 : AppCompatActivity() {
 
     private fun setupRetrofit() {
         api = Retrofit.Builder()
-            .baseUrl("http://10.11.246.191:3000/") // 請根據實際狀況調整
+            .baseUrl("http://192.168.0.10:3000/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(ApiService::class.java)
@@ -207,147 +205,83 @@ class MainActivity1 : AppCompatActivity() {
         })
     }
 
-
     private fun setupSpinners() {
-        // 使用者選單設定
+        setupUserSpinner()
+        setupDiseaseSpinner()
+        setupDateSpinner()
+        setupRangeSpinner()
+    }
+
+    private fun setupUserSpinner() {
         userSpinner.apply {
+            setAdapter(ArrayAdapter(this@MainActivity1, android.R.layout.simple_list_item_1, users))
+            setOnClickListener { showDropDown() }
+            setOnItemClickListener { _, _, _, _ ->
+                clearSelection()
+                val selectedUser = text.toString().trim()
+                loadDatesForUser(selectedUser)
+                dateSpinner.visibility = View.VISIBLE
+                rangeSpinner.visibility = View.VISIBLE
+                diseaseSpinner.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun setupDiseaseSpinner() {
+        val diseaseOptions = listOf("不篩選", "高血壓", "低血壓", "脈搏異常")
+        diseaseSpinner.apply {
             setAdapter(
                 ArrayAdapter(
                     this@MainActivity1,
                     android.R.layout.simple_list_item_1,
-                    users
+                    diseaseOptions
                 )
             )
             setOnClickListener { showDropDown() }
-            setOnItemClickListener { _, _, _, _ ->
-                // 清空舊資料
-                dateSpinner.text = null
-                rangeSpinner.text = null
-                diseaseSpinner.text = null
-                selectedRange = null
-                selectedDiseaseFilter = null
-                resultView.text = ""
-                // 載入該使用者可分析的日期
-                val selectedUser = text.toString().trim()
-                loadDatesForUser(selectedUser)
-                // 顯示日期與範圍選單
-                dateSpinner.visibility = View.VISIBLE
-                rangeSpinner.visibility = View.VISIBLE
-                diseaseSpinner.visibility = View.VISIBLE
-
-            }
-        }
-
-            val diseaseOptions = listOf("不篩選", "高血壓", "低血壓", "脈搏異常",)
-            diseaseSpinner.apply {
-                setAdapter(ArrayAdapter(this@MainActivity1, android.R.layout.simple_list_item_1, diseaseOptions))
-                setOnClickListener { showDropDown() }
-                setOnItemClickListener { _, _, position, _ ->
-                    // ✅ 選疾病時清空日期與範圍
-                    dateSpinner.text = null
-                    rangeSpinner.text = null
-                    selectedRange = null
-                    selectedDiseaseFilter = when (diseaseOptions[position]) {
-                        "不篩選" -> null
-                        "高血壓", "低血壓" -> "血壓"
-                        "脈搏異常" -> "脈搏"
-                        else -> null
-                    }
-                    val user = getSelectedUserOrWarn() ?: return@setOnItemClickListener
-                    val days = when (selectedRange) {
-                        "一週" -> 7
-                        "一個月" -> 30
-                        "半年" -> 180
-                        "一年" -> 365
-                        else -> null
-                    }
-                    drawChartForRecords(user, days)
+            setOnItemClickListener { _, _, position, _ ->
+                clearSelection(except = "disease")
+                selectedDiseaseFilter = when (diseaseOptions[position]) {
+                    "不篩選" -> null
+                    "高血壓", "低血壓" -> "血壓"
+                    "脈搏異常" -> "脈搏"
+                    else -> null
                 }
-            }
-
-        // 日期選擇
-        dateSpinner.apply {
-            setOnClickListener { showDateRangeDialog()  }
-            setOnItemClickListener { _, _, _, _ ->
-                // ✅ 選日期時清空範圍與疾病篩選
-                rangeSpinner.text = null
-                diseaseSpinner.text = null
-                selectedRange = null
-                selectedDiseaseFilter = null
+                getSelectedUserOrWarn()?.let { drawChartForRecords(it, selectedRangeToDays()) }
             }
         }
+    }
 
-        // 範圍選單設定
+    private fun setupDateSpinner() {
+        dateSpinner.setOnClickListener { showDateRangeDialog() }
+        dateSpinner.setOnItemClickListener { _, _, _, _ -> clearSelection(except = "date") }
+    }
+
+    private fun setupRangeSpinner() {
         rangeSpinner.apply {
-            setAdapter(ArrayAdapter(this@MainActivity1, android.R.layout.simple_list_item_1, ranges))
+            setAdapter(
+                ArrayAdapter(
+                    this@MainActivity1,
+                    android.R.layout.simple_list_item_1,
+                    ranges
+                )
+            )
             setOnClickListener { showDropDown() }
             setOnItemClickListener { _, _, position, _ ->
-                // 清空日期並記錄選擇範圍
-                dateSpinner.text = null
-                diseaseSpinner.text = null
+                clearSelection(except = "range")
                 selectedRange = ranges[position]
-                selectedDiseaseFilter = null
-                lastSelectionType = SelectionType.ANALYSIS_RANGE // ✅ 加在這裡
+                lastSelectionType = SelectionType.ANALYSIS_RANGE
             }
         }
     }
 
     private fun setupButtons() {
-        btnAnalyze.setOnClickListener {
-            val user = getSelectedUserOrWarn() ?: return@setOnClickListener
-            val dateText = dateSpinner.text.toString().trim()
-
-            // ✅ 1. 若已選擇「自訂區間」
-            if (!customStartDate.isNullOrBlank() && !customEndDate.isNullOrBlank()) {
-                if (customStartDate == customEndDate) {
-                    // ✅ 起始日與結束日相同：分析單日資料
-                    setLoading(true, "🔄 分析 ${customStartDate} 當日資料...")
-                    api.getSingleAnalysis(user, customStartDate!!)
-                        .enqueue(createAnalysisCallback(user))
-                } else {
-                    // ✅ 起始日與結束日不同：分析區間資料
-                    setLoading(true, "🔄 分析 ${customStartDate} 到 ${customEndDate} 的資料...")
-                    api.getCustomRangeAnalysis(user, customStartDate!!, customEndDate!!)
-                        .enqueue(createAnalysisCallback(user))
-                }
-
-                // ✅ 2. 若是選單日（舊邏輯）
-            } else if (dateText.matches(Regex("""\d{4}-\d{2}-\d{2}"""))) {
-                selectedRange = null
-                rangeSpinner.text = null
-                setLoading(true, "🔄 分析單日資料...")
-                api.getSingleAnalysis(user, dateText).enqueue(createAnalysisCallback(user))
-
-                // ✅ 3. 若選擇固定範圍
-            } else if (!selectedRange.isNullOrBlank()) {
-                when (selectedRange) {
-                    "總分析" -> {
-                        setLoading(true, "🔄 正在分析所有資料...")
-                        api.getAllAggregate(user).enqueue(createAnalysisCallback(user))
-                    }
-                    "一週" -> analyzeRange(user, 7)
-                    "一個月" -> analyzeRange(user, 30)
-                    "半年" -> analyzeRange(user, 180)
-                    "一年" -> analyzeRange(user, 365)
-                }
-
-                // ✅ 4. 都沒選
-            } else {
-                showToast("請先選擇日期或範圍")
-            }
-        }
+        btnAnalyze.setOnClickListener { performAnalysis() }
 
         switchShowDetails.setOnCheckedChangeListener { _, isChecked ->
             if (chart.visibility == View.VISIBLE) {
-                val user = getSelectedUserOrWarn() ?: return@setOnCheckedChangeListener
-                val days = when (selectedRange) {
-                    "一週" -> 7
-                    "一個月" -> 30
-                    "半年" -> 180
-                    "一年" -> 365
-                    else -> null
+                getSelectedUserOrWarn()?.let {
+                    drawChartForRecords(it, selectedRangeToDays())
                 }
-                drawChartForRecords(user, days)
             }
         }
 
@@ -356,104 +290,92 @@ class MainActivity1 : AppCompatActivity() {
             chart.visibility = if (isChecked) View.VISIBLE else View.GONE
 
             if (isChecked) {
-                // 👉 顯示圖表才顯示單位
-                val user = getSelectedUserOrWarn() ?: return@setOnCheckedChangeListener
-                if (!customStartDate.isNullOrBlank() && !customEndDate.isNullOrBlank()) {
-                    drawChartForRecords(user)
-                } else {
-                    val days = when (selectedRange) {
-                        "一週" -> 7
-                        "一個月" -> 30
-                        "半年" -> 180
-                        "一年" -> 365
-                        else -> null
+                getSelectedUserOrWarn()?.let {
+                    if (!customStartDate.isNullOrBlank() && !customEndDate.isNullOrBlank()) {
+                        drawChartForRecords(it)
+                    } else {
+                        drawChartForRecords(it, selectedRangeToDays())
                     }
-                    drawChartForRecords(user, days)
-                }
-            } else {
-                // 👉 切回分析時隱藏單位文字
-            }
-
-            if (isChecked) {
-                val user = getSelectedUserOrWarn() ?: return@setOnCheckedChangeListener
-
-                // 若是自訂日期區間，顯示自訂資料
-                if (!customStartDate.isNullOrBlank() && !customEndDate.isNullOrBlank()) {
-                    drawChartForRecords(user) // 預設顯示全部，過濾在 drawChartForRecords() 處理
-                } else {
-                    val days = when (selectedRange) {
-                        "一週" -> 7
-                        "一個月" -> 30
-                        "半年" -> 180
-                        "一年" -> 365
-                        else -> null
-                    }
-                    drawChartForRecords(user, days)
                 }
             }
         }
     }
 
-    private fun showDateRangeDialog() {
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_date_range)
+    private fun selectedRangeToDays(): Int? = when (selectedRange) {
+        "一週" -> 7
+        "一個月" -> 30
+        "半年" -> 180
+        "一年" -> 365
+        else -> null
+    }
 
-        val btnStart = dialog.findViewById<Button>(R.id.btnStartDate)
-        val btnEnd = dialog.findViewById<Button>(R.id.btnEndDate)
-        val btnConfirm = dialog.findViewById<Button>(R.id.btnConfirm)
+    private fun clearSelection(except: String = "") {
+        if (except != "date") dateSpinner.text = null
+        if (except != "range") rangeSpinner.text = null
+        if (except != "disease") diseaseSpinner.text = null
+        if (except != "range") selectedRange = null
+        if (except != "disease") selectedDiseaseFilter = null
+        resultView.text = ""
+    }
 
-        val calendar = Calendar.getInstance()
-        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    // 🔽 performAnalysis 方法：邏輯統整化
+    private fun performAnalysis() {
+        val user = getSelectedUserOrWarn() ?: return
 
-        btnStart.setOnClickListener {
-            DatePickerDialog(this, { _, year, month, dayOfMonth ->
-                val date = Calendar.getInstance().apply {
-                    set(year, month, dayOfMonth)
+        when {
+            // ✅ 自訂區間
+            !customStartDate.isNullOrBlank() && !customEndDate.isNullOrBlank() -> {
+                if (customStartDate == customEndDate) {
+                    setLoading(true, "🔄 分析 ${customStartDate} 當日資料...")
+                    api.getSingleAnalysis(user, customStartDate!!)
+                        .enqueue(createAnalysisCallback(user))
+                } else {
+                    setLoading(true, "🔄 分析 ${customStartDate} 到 ${customEndDate} 的資料...")
+                    api.getCustomRangeAnalysis(user, customStartDate!!, customEndDate!!)
+                        .enqueue(createAnalysisCallback(user))
                 }
-                customStartDate = sdf.format(date.time)
-                btnStart.text = "開始：$customStartDate"
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
-        }
-
-        btnEnd.setOnClickListener {
-            DatePickerDialog(this, { _, year, month, dayOfMonth ->
-                val date = Calendar.getInstance().apply {
-                    set(year, month, dayOfMonth)
-                }
-                customEndDate = sdf.format(date.time)
-                btnEnd.text = "結束：$customEndDate"
-            }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
-        }
-
-        btnConfirm.setOnClickListener {
-            if (customStartDate != null && customEndDate != null) {
-                dateSpinner.setText("$customStartDate 到 $customEndDate", false)
-                rangeSpinner.text = null
-                diseaseSpinner.text = null
+            }
+            // ✅ 選單日（無自訂）
+            dateSpinner.text.toString().trim().matches(Regex("""\\d{4}-\\d{2}-\\d{2}""")) -> {
+                val date = dateSpinner.text.toString().trim()
                 selectedRange = null
-                selectedDiseaseFilter = null
-
-                lastSelectionType = SelectionType.DATE_RANGE
-            } else {
-                showToast("請選擇完整區間")
+                rangeSpinner.text = null
+                setLoading(true, "🔄 分析單日資料...")
+                api.getSingleAnalysis(user, date).enqueue(createAnalysisCallback(user))
             }
-            dialog.dismiss()
-        }
+            // ✅ 選擇固定範圍
+            !selectedRange.isNullOrBlank() -> {
+                when (selectedRange) {
+                    "總分析" -> {
+                        setLoading(true, "🔄 正在分析所有資料...")
+                        api.getAllAggregate(user).enqueue(createAnalysisCallback(user))
+                    }
 
-        dialog.show()
+                    else -> analyzeRange(user, selectedRangeToDays() ?: 0)
+                }
+            }
+
+            else -> {
+                showToast("請先選擇日期或範圍")
+            }
+        }
     }
 
+
+    // 🔽 createAnalysisCallback 提取重複處理邏輯、保持結構清晰
     private fun createAnalysisCallback(user: String): Callback<AnalysisResult> =
         object : Callback<AnalysisResult> {
-            override fun onResponse(call: Call<AnalysisResult>, response: Response<AnalysisResult>) {
+            override fun onResponse(
+                call: Call<AnalysisResult>,
+                response: Response<AnalysisResult>
+            ) {
                 setLoading(false)
                 if (response.isSuccessful) {
-                    response.body()?.let {
-                        showResult(it)
-                    } ?: run {
-                        resultView.text = "❌ 查無分析資料"
-                        Log.d("HealthAnalysis", "回傳空資料")
-                    }
+                    response.body()?.let { showResult(it) }
+                        ?: run {
+                            resultView.text = "❌ 查無分析資料"
+                            Log.d("HealthAnalysis", "回傳空資料")
+                        }
                 } else {
                     resultView.text = "❌ 分析失敗"
                     Log.d("HealthAnalysis", "分析失敗，狀態碼：${response.code()}")
@@ -466,6 +388,61 @@ class MainActivity1 : AppCompatActivity() {
                 Log.d("HealthAnalysis", "API 呼叫失敗：${t.message}")
             }
         }
+
+
+    // 🔽 showDateRangeDialog 保持功能不變，但加上註解與邏輯清晰
+    private fun showDateRangeDialog() {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_date_range)
+
+        val btnStart = dialog.findViewById<Button>(R.id.btnStartDate)
+        val btnEnd = dialog.findViewById<Button>(R.id.btnEndDate)
+        val btnConfirm = dialog.findViewById<Button>(R.id.btnConfirm)
+
+        val calendar = Calendar.getInstance()
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        btnStart.setOnClickListener {
+            DatePickerDialog(
+                this,
+                { _, y, m, d ->
+                    val date = Calendar.getInstance().apply { set(y, m, d) }
+                    customStartDate = sdf.format(date.time)
+                    btnStart.text = "開始：$customStartDate"
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+
+        btnEnd.setOnClickListener {
+            DatePickerDialog(
+                this,
+                { _, y, m, d ->
+                    val date = Calendar.getInstance().apply { set(y, m, d) }
+                    customEndDate = sdf.format(date.time)
+                    btnEnd.text = "結束：$customEndDate"
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+
+        btnConfirm.setOnClickListener {
+            if (customStartDate != null && customEndDate != null) {
+                dateSpinner.setText("$customStartDate 到 $customEndDate", false)
+                clearSelection(except = "date")
+                lastSelectionType = SelectionType.DATE_RANGE
+            } else {
+                showToast("請選擇完整區間")
+            }
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
 
     private fun showResult(res: AnalysisResult) {
         val icon = when (res.風險等級) {
@@ -484,6 +461,7 @@ class MainActivity1 : AppCompatActivity() {
                     res.record_date
                 }
             }
+
             SelectionType.ANALYSIS_RANGE -> selectedRange ?: res.record_date
             SelectionType.NONE -> res.record_date
         }
@@ -513,14 +491,15 @@ class MainActivity1 : AppCompatActivity() {
         }
     }
 
+    // 🔽 openSuggestionUrl 統一錯誤處理與提示風格
     private fun openSuggestionUrl(disease: String) {
-        Toast.makeText(this@MainActivity1, "📖 正在開啟：$disease 建議...", Toast.LENGTH_SHORT).show()
-
+        Toast.makeText(this, "📖 正在查詢 $disease 的建議...", Toast.LENGTH_SHORT).show()
         api.getSourceUrl(disease).enqueue(object : Callback<UrlResponse> {
             override fun onResponse(call: Call<UrlResponse>, response: Response<UrlResponse>) {
                 val url = response.body()?.url
                 if (!url.isNullOrBlank()) {
-                    Toast.makeText(this@MainActivity1, "✅ 已跳轉至建議網站", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@MainActivity1, "✅ 已跳轉至建議網站", Toast.LENGTH_SHORT)
+                        .show()
                     WebViewActivity.start(this@MainActivity1, url)
                 } else {
                     showToast("❌ 查無建議網址")
@@ -533,235 +512,123 @@ class MainActivity1 : AppCompatActivity() {
         })
     }
 
+    // ✅ 更新 drawChartForRecords 只顯示主線 + 可切換 LimitLine（不含疾病點）
     private fun drawChartForRecords(user: String, days: Int? = null) {
         chart.clear()
         api.getRecords(user).enqueue(object : Callback<List<HealthRecord>> {
-            override fun onResponse(call: Call<List<HealthRecord>>, response: Response<List<HealthRecord>>) {
-                val records = response.body()
-                if (records.isNullOrEmpty()) {
+            override fun onResponse(
+                call: Call<List<HealthRecord>>,
+                response: Response<List<HealthRecord>>
+            ) {
+                val records = response.body().orEmpty()
+                if (records.isEmpty()) {
                     showToast("無記錄資料")
                     Log.d("HealthAnalysis", "記錄資料為空")
                     return
                 }
 
-                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-
-                // 解析所有記錄中的有效日期
-                val recordDates = records.mapNotNull {
-                    runCatching { dateFormat.parse(it.measure_at) }.getOrNull()
-                }
-
-                val latestDate = recordDates.maxOrNull()
-
-                // 改成這樣：先看 days，再看 custom，再 fallback
-                val filteredRecords = when {
-                    // 1️⃣ 如果傳進來有 days，先用「最近 N 天」過濾
-                    days != null && latestDate != null -> {
-                        val cutoff = Calendar.getInstance().apply {
-                            time = latestDate
-                            add(Calendar.DAY_OF_YEAR, -days)
-                        }.time
-                        records.filter {
-                            dateFormat.parse(it.measure_at)?.after(cutoff) == true
-                        }
-                    }
-                    // 2️⃣ 再看是不是自訂區間
-                    !customStartDate.isNullOrBlank() && !customEndDate.isNullOrBlank() -> {
-                        val start = dateFormat.parse(customStartDate!!)!!
-                        val end   = dateFormat.parse(customEndDate!!)!!
-                        records.filter { rec ->
-                            dateFormat.parse(rec.measure_at)?.let { it in start..end } ?: false
-                        }
-                    }
-                    // 3️⃣ 都沒有，就全部資料
-                    else -> records
-                }
-
-
-                // 🔽 以下這段保留你原本的
                 val inputFormats = listOf(
                     SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()),
                     SimpleDateFormat("yyyy/MM/dd", Locale.getDefault()),
                     SimpleDateFormat("yyyy/M/d", Locale.getDefault()),
                     SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)
                 )
-
                 val outputFormat = SimpleDateFormat("M/d", Locale.getDefault())
 
-                // 解析 + 排序（注意！使用 Pair 確保資料跟日期配對）
-                val sortedWithDates = filteredRecords.mapNotNull { record ->
+                val parsedRecords = records.mapNotNull { record ->
                     val parsedDate = inputFormats.firstNotNullOfOrNull { fmt ->
-                        try { fmt.parse(record.measure_at) } catch (_: Exception) { null }
+                        runCatching { fmt.parse(record.measure_at) }.getOrNull()
                     }
                     parsedDate?.let { Pair(record, it) }
-                }.sortedBy { it.second }  // 以 Date 排序
+                }.sortedBy { it.second }
 
-                // 分離記錄與日期
-                val sortedRecords = sortedWithDates.map { it.first }
-                formattedDateLabels = sortedWithDates.map { outputFormat.format(it.second) }
+                val sortedRecords = parsedRecords.map { it.first }
+                formattedDateLabels = parsedRecords.map { outputFormat.format(it.second) }
 
-                latestXLabels = sortedRecords.map { it.measure_at }
-
-                // 更新使用者性別與身高（以第一筆記錄為準）
-                sortedRecords.firstOrNull()?.let {
-                    currentGender = it.gender
-                    currentHeightM = it.height.toFloat() / 100
-                }
-
-                // 取得各記錄異常指標
-                val abnormalIndicators = sortedRecords
-                    .flatMap { analyzeRecord(it) }
-                    .flatMap { diseaseSeriesMapping[it] ?: emptyList() }
-                    .toSet()
-
-                // 建立各量測指標資料集
-                val systolicEntries = mutableListOf<Entry>()
-                val diastolicEntries = mutableListOf<Entry>()
-                val pulseEntries = mutableListOf<Entry>()
-                sortedRecords.forEachIndexed { index, record ->
-                    val fixedRecord = record.copy(user = user)
-
-                    systolicEntries.add(
-                        Entry(
-                            index.toFloat(),
-                            record.systolic_mmHg.toFloat()
-                        ).apply {data = fixedRecord })
-                    diastolicEntries.add(
-                        Entry(
-                            index.toFloat(),
-                            record.diastolic_mmHg.toFloat()
-                        ).apply { data = fixedRecord})
-                    pulseEntries.add(
-                        Entry(
-                            index.toFloat(),
-                            record.pulse_bpm.toFloat()
-                        ).apply { data = fixedRecord })
-                }
-
-                // 使用 MutableList<ILineDataSet>，避免後續轉型問題
-                val dataSets = mutableListOf<ILineDataSet>()
-                if ("systolic" in abnormalIndicators && (selectedDiseaseFilter == null || selectedDiseaseFilter == "血壓")) {
-                    val systolicDataSet =
-                        createDataSet(systolicEntries, "收縮壓", Color.RED, Color.RED, unitLabel = "mmHg")
-                    Log.d("HealthAnalysis", "systolicDataSet label: ${systolicDataSet.label}")
-                    dataSets.add(systolicDataSet)
-                }
-
-                if ("diastolic" in abnormalIndicators && (selectedDiseaseFilter == null || selectedDiseaseFilter == "血壓")) {
-                    val diastolicDataSet =
-                        createDataSet(diastolicEntries, "舒張壓", Color.BLUE, Color.BLUE, unitLabel = "mmHg")
-                    dataSets.add(diastolicDataSet)
-                }
-
-                if ("pulse" in abnormalIndicators && (selectedDiseaseFilter == null || selectedDiseaseFilter == "脈搏")) {
-                    val pulseDataSet =
-                        createDataSet(pulseEntries, "脈搏", Color.MAGENTA, Color.MAGENTA, unitLabel = "bpm")
-                    Log.d("HealthAnalysis", "pulseDataSet label: ${pulseDataSet.label}")
-                    dataSets.add(pulseDataSet)
-                }
-
-                // 建立疾病標記資料集（僅顯示資料點，不畫連線）
-                val diseaseMarkerMap = mutableMapOf<String, MutableList<Entry>>().apply {
-                    diseaseMapping.keys.forEach { put(it, mutableListOf()) }
-                }
-                sortedRecords.forEachIndexed { index, record ->
-                    analyzeRecord(record).forEach { disease ->
-                        diseaseSeriesMapping[disease]?.forEach { key ->
-                            val yValue = when (key) {
-                                "systolic" -> record.systolic_mmHg.toFloat()
-                                "diastolic" -> record.diastolic_mmHg.toFloat()
-                                "pulse" -> record.pulse_bpm.toFloat()
-                                else -> return@forEach
-                            }
-                            diseaseMarkerMap[disease]?.add(
-                                Entry(
-                                    index.toFloat(),
-                                    yValue
-                                ).apply { data = record })
-                        }
+                val latestDate = parsedRecords.maxByOrNull { it.second }?.second
+                val filteredRecords = when {
+                    days != null && latestDate != null -> {
+                        val cutoff = Calendar.getInstance().apply {
+                            time = latestDate
+                            add(Calendar.DAY_OF_YEAR, -days)
+                        }.time
+                        parsedRecords.filter { it.second.after(cutoff) }.map { it.first }
                     }
-                }
-                diseaseMarkerMap.forEach { (disease, entries) ->
-                    if (entries.isNotEmpty()) {
-                        Log.d(
-                            "HealthAnalysis",
-                            "Adding disease marker dataset, disease: $disease, entry count: ${entries.size}"
-                        )
-                        val relatedKeys = diseaseSeriesMapping[disease] ?: emptyList()
-                        val isMatch = selectedDiseaseFilter == null || selectedDiseaseFilter == "全部" || when (selectedDiseaseFilter) {
-                            "血壓" -> relatedKeys.any { it == "systolic" || it == "diastolic" }
-                            "脈搏" -> relatedKeys.contains("pulse")
-                            else -> false
-                        }
 
-                        if (isMatch) {
-                            val (markerColor, _) = diseaseMapping[disease]!!
-                            dataSets.add(
-                                createDataSet(
-                                    entries,
-                                    label = disease,
-                                    lineColor = markerColor,
-                                    circleColor = markerColor,
-                                    lineWidth = 0f,
-                                    circleRadius = 6f,
-                                    valueTextSize = 12f,
-                                    drawValues = false
-                                )
-                            )
-                        }
+                    !customStartDate.isNullOrBlank() && !customEndDate.isNullOrBlank() -> {
+                        val start = inputFormats[0].parse(customStartDate!!)!!
+                        val end = inputFormats[0].parse(customEndDate!!)!!
+                        parsedRecords.filter { it.second in start..end }.map { it.first }
                     }
+
+                    else -> sortedRecords
                 }
 
-                if (dataSets.isEmpty()) {
-                    showToast("目前沒有異常指標，圖表無法顯示")
+                if (filteredRecords.isEmpty()) {
+                    showToast("符合條件的資料為空")
                     chart.clear()
                     return
                 }
-                chart.data = LineData(dataSets)
-                chart.setVisibleXRangeMaximum(5f)
-                chart.moveViewToX(chart.data.entryCount.toFloat())
-                chart.data.dataSets.forEachIndexed { index, dataSet ->
-                    Log.d(
-                        "HealthAnalysis",
-                        "After setting chart data: 資料集 $index 的 label: ${dataSet.label}"
-                    )
-                }
-                // 設定圖表資料
-                chart.data = LineData(dataSets)
 
-                // 👇 單位顯示修正版 👇
-                val hasRealData = dataSets.any { it.entryCount > 0 }
-                if (hasRealData) {
-                    val unitSet = mutableSetOf<String>()
-                    dataSets.filter { it.entryCount > 0 }.forEach { dataSet ->
-                        when {
-                            dataSet.label.contains("收縮壓") || dataSet.label.contains("舒張壓") -> unitSet.add("mmHg")
-                            dataSet.label.contains("脈搏") -> unitSet.add("bpm")
-                        }
-                    }
+                val systolicEntries = mutableListOf<Entry>()
+                val diastolicEntries = mutableListOf<Entry>()
+                val pulseEntries = mutableListOf<Entry>()
+                var gender = "male"
+                var height = 1.70f
+
+                filteredRecords.forEachIndexed { index, rec ->
+                    val x = index.toFloat()
+                    val fixed = rec.copy(user = user)
+                    systolicEntries.add(Entry(x, rec.systolic_mmHg.toFloat()).apply {
+                        data = fixed
+                    })
+                    diastolicEntries.add(Entry(x, rec.diastolic_mmHg.toFloat()).apply {
+                        data = fixed
+                    })
+                    pulseEntries.add(Entry(x, rec.pulse_bpm.toFloat()).apply { data = fixed })
+                    gender = rec.gender
+                    height = rec.height.toFloat() / 100f
                 }
 
-                // 🔽 👇 加在這裡 👇
-                chart.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-                    override fun onGlobalLayout() {
-                        chart.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                        chart.legend.isWordWrapEnabled = true
-                        chart.legend.maxSizePercent = 0.7f
-                        chart.invalidate()
-                        chart.requestLayout()
-                    }
-                })
+                val dataSets = mutableListOf<ILineDataSet>()
+                if (selectedDiseaseFilter == null || selectedDiseaseFilter == "血壓") {
+                    dataSets.add(createDataSet(systolicEntries, "收縮壓", Color.RED, Color.RED))
+                    dataSets.add(createDataSet(diastolicEntries, "舒張壓", Color.BLUE, Color.BLUE))
+                }
+                if (selectedDiseaseFilter == null || selectedDiseaseFilter == "脈搏") {
+                    dataSets.add(createDataSet(pulseEntries, "脈搏", Color.MAGENTA, Color.MAGENTA))
+                }
 
-                val entryCount = chart.data?.dataSets?.firstOrNull()?.entryCount ?: 0
+                chart.data = LineData(dataSets)
+
+                val entryCount = chart.data.entryCount
+                val showCount = if (entryCount >= 10) 10f else entryCount.toFloat()
+                chart.setVisibleXRangeMaximum(showCount)
+                chart.moveViewToX(entryCount - showCount)
+
+                // ✅ 動態產生單位
+                val unitSet = mutableSetOf<String>()
+                chart.data.dataSets.forEach { dataSet ->
+                    when {
+                        dataSet.label.contains("收縮壓") || dataSet.label.contains("舒張壓") -> unitSet.add("mmHg")
+                        dataSet.label.contains("脈搏") -> unitSet.add("bpm")
+                    }
+                }
+                chart.post {
+                    chart.description.isEnabled = true
+                    chart.description.text = "單位：${unitSet.joinToString(" / ")}"
+                    chart.description.textSize = 14f
+                    chart.description.textColor = Color.DKGRAY
+                    chart.description.setPosition(400f, 60f) // ✅ 進來一點避免被擠出
+                    chart.invalidate() // 讓圖表立即刷新畫面
+                }
 
                 chart.xAxis.apply {
-                    setDrawLabels(true)
                     valueFormatter = IndexAxisValueFormatter(formattedDateLabels)
                     labelCount = formattedDateLabels.size
                     position = XAxis.XAxisPosition.BOTTOM
                     granularity = 1f
                     textSize = 14.5f
-                    labelRotationAngle = 0f
                     textColor = Color.DKGRAY
                 }
                 chart.axisLeft.textSize = 14.5f
@@ -771,94 +638,31 @@ class MainActivity1 : AppCompatActivity() {
                     formSize = 14.5f
                     xEntrySpace = 20f
                     yEntrySpace = 20f
+                    isWordWrapEnabled = true
+                    maxSizePercent = 0.7f
                 }
+                chart.axisLeft.axisMaximum = chart.yMax + 10f  // ✅ 給上方多一點空間
+                chart.setExtraOffsets(0f, 30f, 0f, 20f)         // ✅ 避免內容太擠
+                chart.xAxis.setLabelCount(5, true)              // ✅ 避免日期太多壓在一起
+
                 configureChart(chart)
                 chart.marker = MyMarkerView(
                     this@MainActivity1,
                     R.layout.custom_marker_view,
                     chart,
-                    currentGender,
-                    currentHeightM
+                    gender,
+                    height
                 )
 
-
+                val abnormalIndicators =
+                    setOf("systolic", "diastolic", "pulse").filterByDisease().toSet()
                 if (switchShowDetails.isChecked) {
-                    addLimitLinesToChart(chart, abnormalIndicators.filterByDisease())
+                    addLimitLinesToChart(chart, abnormalIndicators)
                 } else {
-                    chart.axisLeft.removeAllLimitLines()  // 🔥 若未開啟「顯示細節」，清空 limit lines
+                    chart.axisLeft.removeAllLimitLines()
                 }
-
-                // 計算單位字串
-                val unitSet = mutableSetOf<String>()
-                chart.data?.dataSets?.forEach { dataSet ->
-                    when {
-                        dataSet.label.contains("收縮壓") || dataSet.label.contains("舒張壓") -> unitSet.add("mmHg")
-                        dataSet.label.contains("脈搏") -> unitSet.add("bpm")
-                    }
-                }
-
-                if (unitSet.isNotEmpty()) {
-                    val unitText = "單位：${unitSet.joinToString(" / ")}"
-
-                    chart.description.apply {
-                        text = unitText
-                        textSize = 14f
-                        textColor = Color.DKGRAY
-                        // 移進來並往下
-                        setPosition(400f, chart.height * 0.16f)  // 調整 Y 值來控制「往下」
-                        isEnabled = true
-                    }
-                } else {
-                    chart.description.isEnabled = false
-                }
-
-
 
                 chart.invalidate()
-                // 延後操作，確保圖表已繪製完成
-                chart.post {
-                    // 此時圖表已經繪製完成，MarkerView 也應該已附加到圖表上
-                    Log.d("HealthAnalysis", "Chart fully drawn, ready for interaction")
-                    chart.legend.isWordWrapEnabled = true
-                    chart.invalidate()
-                    chart.requestLayout()
-                }
-
-                // 設定圖表手勢與點擊監聽（採用空實作）
-                chart.setOnChartGestureListener(object : OnChartGestureListener {
-                    override fun onChartGestureStart(
-                        me: MotionEvent?,
-                        lastPerformedGesture: ChartTouchListener.ChartGesture?
-                    ) {
-                    }
-
-                    override fun onChartGestureEnd(
-                        me: MotionEvent?,
-                        lastPerformedGesture: ChartTouchListener.ChartGesture?
-                    ) {
-                    }
-
-                    override fun onChartLongPressed(me: MotionEvent?) {}
-                    override fun onChartDoubleTapped(me: MotionEvent?) {}
-                    override fun onChartSingleTapped(me: MotionEvent?) {}
-                    override fun onChartFling(
-                        me1: MotionEvent?,
-                        me2: MotionEvent?,
-                        velocityX: Float,
-                        velocityY: Float
-                    ) {
-                    }
-
-                    override fun onChartScale(me: MotionEvent?, scaleX: Float, scaleY: Float) {}
-                    override fun onChartTranslate(me: MotionEvent?, dX: Float, dY: Float) {}
-                })
-
-                chart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
-                    override fun onValueSelected(e: Entry?, h: Highlight?) {}
-                    override fun onNothingSelected() {
-                        chart.highlightValue(null)
-                    }
-                })
             }
 
             override fun onFailure(call: Call<List<HealthRecord>>, t: Throwable) {
@@ -878,8 +682,9 @@ class MainActivity1 : AppCompatActivity() {
                 textColor = color
                 textSize = 15f
                 enableDashedLine(8f, 6f, 0f)
-                labelPosition = LimitLine.LimitLabelPosition.RIGHT_TOP
-                yOffset = 12f
+                labelPosition = LimitLine.LimitLabelPosition.RIGHT_TOP // ✅ 顯示在右上
+                // ✅ 這一行加大 Y 偏移，讓標籤往下移動一點
+                yOffset = 30f  // ← 原本你應該只有 12f，建議拉到 30f ~ 40f 之間
                 xOffset = 5f
             }
         }
@@ -966,7 +771,7 @@ class MainActivity1 : AppCompatActivity() {
                     createLimitLine(
                         101f,
                         "高脈搏：101–120",
-                        Color.YELLOW
+                        Color.parseColor("#FFA000")  // 深黃色
                     )
                 )
             if ("脈搏太低" in diseaseMapping)
@@ -976,61 +781,60 @@ class MainActivity1 : AppCompatActivity() {
                     createLimitLine(
                         59f,
                         "低脈搏：50–59",
-                        Color.parseColor("#ADD8E6")
+                        Color.parseColor("#1565C0")  // 深藍色
                     )
                 )
         }
     }
 
+    // 🔽 configureChart：統一圖表樣式設定
     private fun configureChart(chart: LineChart) {
         chart.apply {
             description.isEnabled = false
             setTouchEnabled(true)
-            setHighlightPerTapEnabled(true)
-            setHighlightPerDragEnabled(true)
+            isDragEnabled = true
             setScaleEnabled(true)
+            setDrawMarkers(true)
             setPinchZoom(true)
             setDoubleTapToZoomEnabled(false)
-            setDragEnabled(true)
-            setDrawMarkers(true)
-            chart.setScaleXEnabled(true)
-            chart.setScaleYEnabled(false)
+            setScaleYEnabled(false)
 
-            // 🔧 左側 Y 軸設定
+            // ✅ 增加上下 padding，避免擠壓
+            setExtraOffsets(0f, 30f, 0f, 20f)
+
             axisLeft.apply {
                 textSize = 14.5f
                 textColor = Color.DKGRAY
                 axisLineColor = Color.DKGRAY
                 gridColor = Color.LTGRAY
+                axisMaximum = axisMaximum + 10f  // ✅ 增加 Y 軸最大值避免上面擠壓
             }
-
-            // 🔧 右側 Y 軸設定（僅作輔助用途）
             axisRight.apply {
                 isEnabled = true
                 textSize = 14.5f
                 textColor = Color.DKGRAY
                 axisLineColor = Color.DKGRAY
-                gridColor = Color.TRANSPARENT // 不顯示右側背景線
+                gridColor = Color.TRANSPARENT
             }
-
-            // 🔧 圖例 Legend 設定（自動換行 + 間距 + 對齊 + 美化）
             legend.apply {
                 verticalAlignment = LegendVerticalAlignment.TOP
                 horizontalAlignment = LegendHorizontalAlignment.CENTER
                 orientation = LegendOrientation.HORIZONTAL
                 setDrawInside(false)
-                isWordWrapEnabled = true     // ✨ 超重要，支援自動換行
-                maxSizePercent =  0.7f      // ✅ 限制最大寬度觸發換行
-                xEntrySpace = 16f            // 左右間距
-                yEntrySpace = 12f            // 上下間距
+                isWordWrapEnabled = true
+                maxSizePercent = 0.7f
+                xEntrySpace = 16f
+                yEntrySpace = 12f
                 textSize = 12f
-                formSize = 12f               // 圖例前面的 icon 大小
+                formSize = 12f
             }
-
-            setExtraOffsets(10f, 10f, 10f, 20f) // 四邊額外留白，避免重疊
+            // ✅ 避免 X 軸日期擠太多
+            xAxis.setLabelCount(5, true)
+            setExtraOffsets(10f, 10f, 10f, 20f)
         }
     }
 
+    // 🔽 createDataSet：統一繪圖屬性與格式化
     private fun createDataSet(
         entries: List<Entry>,
         label: String,
@@ -1051,10 +855,23 @@ class MainActivity1 : AppCompatActivity() {
             setDrawValues(drawValues)
             mode = LineDataSet.Mode.LINEAR
 
+            if (label in listOf("收縮壓", "舒張壓", "脈搏")) {
+                setDrawCircles(true)                  // ✅ 畫圓點
+                setCircleRadius(6f)                  // ✅ 改這裡！讓點變大
+                setCircleColor(lineColor)            // ✅ 主線顏色
+                setDrawValues(true)                  // ✅ 顯示數值
+                setValueTextSize(14f)                 // ✅ 字體大小
+                setValueTextColor(Color.BLACK)        // ✅ 字體顏色
+                mode = LineDataSet.Mode.LINEAR       // ✅ 線條模式
+                this.lineWidth = 3f
+            }
+
+
+            // ✅ 單位格式化（可保留）
             if (unitLabel.isNotBlank()) {
                 valueFormatter = object : ValueFormatter() {
                     override fun getPointLabel(entry: Entry?): String {
-                        return if (entry != null) "${entry.y.toInt()}" else ""
+                        return entry?.y?.toInt()?.toString() ?: ""
                     }
                 }
             }
@@ -1154,30 +971,42 @@ class MainActivity1 : AppCompatActivity() {
             val fullChart = findViewById<LineChart>(R.id.dialog_chart)
             val closeBtn = findViewById<ImageButton>(R.id.btnCloseDialog)
 
-            // ✅ 複製主圖資料
-            fullChart.data = chart.data
+            // ✅ 複製主圖資料並過濾：只保留主線 (收縮壓、舒張壓、脈搏)
+            val filteredDataSets = chart.data.dataSets.filter {
+                it.label in listOf("收縮壓", "舒張壓", "脈搏")
+            }
+            fullChart.data = LineData(filteredDataSets)
 
-            // 🔍 解析目前有哪些單位
+            // ✅ 顯示最多 10 筆並自動滾到最新
+            val entryCount = fullChart.data.entryCount
+            val showCount = if (entryCount >= 10) 10f else entryCount.toFloat()
+            fullChart.setVisibleXRangeMaximum(showCount)
+            fullChart.moveViewToX(entryCount - showCount)
+
+            // ✅ 補上單位描述
             val unitSet = mutableSetOf<String>()
-            fullChart.data?.dataSets?.forEach { dataSet ->
+            fullChart.data.dataSets.forEach { dataSet ->
                 when {
-                    dataSet.label.contains("收縮壓") || dataSet.label.contains("舒張壓") -> unitSet.add("mmHg")
+                    dataSet.label.contains("收縮壓") || dataSet.label.contains("舒張壓") -> unitSet.add(
+                        "mmHg"
+                    )
+
                     dataSet.label.contains("脈搏") -> unitSet.add("bpm")
                 }
             }
-
             fullChart.post {
-                val unitLabel = "單位：" + unitSet.joinToString(" / ")
                 fullChart.description.isEnabled = true
-                fullChart.description.text = unitLabel
+                fullChart.description.text = "單位：${unitSet.joinToString(" / ")}"
                 fullChart.description.textSize = 16f
                 fullChart.description.textColor = Color.DKGRAY
                 fullChart.description.setPosition(
-                    400f, fullChart.viewPortHandler.contentTop() - 40f)
+                    450f,
+                    fullChart.viewPortHandler.contentTop() - 40f
+                )
                 fullChart.invalidate()
             }
 
-            // ✅ 補上單位格式
+            // ✅ 套用單位格式化器
             fullChart.data.dataSets.forEach { dataSet ->
                 val unit = when {
                     dataSet.label.contains("脈搏") -> "bpm"
@@ -1193,12 +1022,11 @@ class MainActivity1 : AppCompatActivity() {
                 }
             }
 
-            // ✅ 偵測要加哪些異常線
-            val dataLabels = chart.data.dataSets.mapNotNull { it.label }
+            // ✅ 加入 LimitLine（根據 switch）
             val abnormalIndicators = mutableSetOf<String>().apply {
-                if (dataLabels.any { it.contains("收縮壓") }) add("systolic")
-                if (dataLabels.any { it.contains("舒張壓") }) add("diastolic")
-                if (dataLabels.any { it.contains("脈搏") }) add("pulse")
+                if (filteredDataSets.any { it.label.contains("收縮壓") }) add("systolic")
+                if (filteredDataSets.any { it.label.contains("舒張壓") }) add("diastolic")
+                if (filteredDataSets.any { it.label.contains("脈搏") }) add("pulse")
             }.filterByDisease().toSet()
 
             if (switchShowDetails.isChecked) {
@@ -1207,10 +1035,8 @@ class MainActivity1 : AppCompatActivity() {
                 fullChart.axisLeft.removeAllLimitLines()
             }
 
-            // ✅ 標準樣式
+            // ✅ 樣式設置與 MarkerView
             configureChart(fullChart)
-
-            // ✅ MarkerView
             fullChart.marker = MyMarkerView(
                 this@MainActivity1,
                 R.layout.custom_marker_view,
@@ -1219,29 +1045,20 @@ class MainActivity1 : AppCompatActivity() {
                 currentHeightM
             )
 
+            // ✅ 顯示使用者資訊
             val infoText = findViewById<TextView>(R.id.user_info_text)
-            val record = chart.data?.dataSets?.firstOrNull()?.getEntryForIndex(0)?.data as? HealthRecord
+            val record =
+                chart.data?.dataSets?.firstOrNull()?.getEntryForIndex(0)?.data as? HealthRecord
             val genderText = when (record?.gender?.lowercase()) {
                 "male", "男" -> "男"
                 "female", "女" -> "女"
                 else -> "⚠️未知"
             }
             val ageText = record?.age?.let { "$it 歲" } ?: "未知"
-            infoText.text = "👤 ${record?.user}｜⚧️ 性別：$genderText｜🎂 年齡：$ageText｜📏 身高：${record?.height?.toInt()}cm｜⚖️ 體重：${record?.weight}kg｜"
+            infoText.text =
+                "👤 ${record?.user}｜⚧️ 性別：$genderText｜🎂 年齡：$ageText｜📏 身高：${record?.height?.toInt()}cm｜⚖️ 體重：${record?.weight}kg｜"
 
-
-            val inputFormats = listOf(
-                SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()),
-                SimpleDateFormat("yyyy/M/d", Locale.getDefault()),
-                SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH)
-            )
-            val outputFormat = SimpleDateFormat("M/d", Locale.getDefault())
-
-            fullChart.xAxis.valueFormatter = IndexAxisValueFormatter(formattedDateLabels)
-            fullChart.xAxis.labelCount = formattedDateLabels.size
-
-
-            // ✅ 設定 X 軸
+            // ✅ X 軸設定
             fullChart.xAxis.apply {
                 valueFormatter = IndexAxisValueFormatter(formattedDateLabels)
                 setDrawLabels(true)
@@ -1251,13 +1068,13 @@ class MainActivity1 : AppCompatActivity() {
                 textSize = 16.5f
                 textColor = Color.DKGRAY
                 setLabelCount(formattedDateLabels.size, true)
-                gridColor = Color.LTGRAY       // 使用淡灰色，柔和清楚
-                gridLineWidth = 1.2f           // 線條比預設略粗但不過頭
-                axisLineColor = Color.DKGRAY   // X 軸底線變明顯一點
+                gridColor = Color.LTGRAY
+                gridLineWidth = 1.2f
+                axisLineColor = Color.DKGRAY
                 axisLineWidth = 1.5f
             }
 
-            // ✅ Y 軸 / 圖例
+            // ✅ Y 軸與圖例
             fullChart.axisLeft.textSize = 16.5f
             fullChart.axisRight.textSize = 16.5f
             fullChart.legend.apply {
@@ -1273,7 +1090,7 @@ class MainActivity1 : AppCompatActivity() {
             }
             fullChart.setExtraOffsets(0f, 24f, 0f, 30f)
 
-            // ✅ 點資料後開啟建議網址
+            // ✅ 點選資料後開啟建議（保留互動）
             fullChart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
                 override fun onValueSelected(e: Entry?, h: Highlight?) {
                     if (e == null || h == null || fullChart.data == null) return
@@ -1286,7 +1103,11 @@ class MainActivity1 : AppCompatActivity() {
                     } ?: return
 
                     if (disease != "正常值" && disease != "未知") {
-                        Toast.makeText(this@MainActivity1, "📖 正在開啟：$disease 建議...", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@MainActivity1,
+                            "📖 正在開啟：$disease 建議...",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         openSuggestionUrl(disease)
                     }
                 }
@@ -1296,22 +1117,40 @@ class MainActivity1 : AppCompatActivity() {
                 }
             })
 
-            // ✅ 支援手勢操作（可選）
+            // ✅ 手勢控制（可選）
             fullChart.setOnChartGestureListener(object : OnChartGestureListener {
-                override fun onChartGestureStart(me: MotionEvent?, lastPerformedGesture: ChartTouchListener.ChartGesture?) {}
-                override fun onChartGestureEnd(me: MotionEvent?, lastPerformedGesture: ChartTouchListener.ChartGesture?) {}
+                override fun onChartGestureStart(
+                    me: MotionEvent?,
+                    lastPerformedGesture: ChartTouchListener.ChartGesture?
+                ) {
+                }
+
+                override fun onChartGestureEnd(
+                    me: MotionEvent?,
+                    lastPerformedGesture: ChartTouchListener.ChartGesture?
+                ) {
+                }
+
                 override fun onChartLongPressed(me: MotionEvent?) {}
                 override fun onChartDoubleTapped(me: MotionEvent?) {}
                 override fun onChartSingleTapped(me: MotionEvent?) {}
-                override fun onChartFling(me1: MotionEvent?, me2: MotionEvent?, velocityX: Float, velocityY: Float) {}
+                override fun onChartFling(
+                    me1: MotionEvent?,
+                    me2: MotionEvent?,
+                    velocityX: Float,
+                    velocityY: Float
+                ) {
+                }
+
                 override fun onChartScale(me: MotionEvent?, scaleX: Float, scaleY: Float) {}
                 override fun onChartTranslate(me: MotionEvent?, dX: Float, dY: Float) {}
             })
 
-            // ✅ 關閉按鈕
-            closeBtn.setOnClickListener { dismiss() }
-
-            show()
+            closeBtn.setOnClickListener {
+                (this@MainActivity1.findViewById<Switch>(R.id.switch_expand_chart)).isChecked = false
+                dismiss()  // ✅ 最後再關掉 Dialog
+            }
+            show()  // ✅ 最後呼叫 show()
         }
     }
 

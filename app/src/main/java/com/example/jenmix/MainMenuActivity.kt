@@ -36,7 +36,7 @@ class MainMenuActivity : AppCompatActivity() {
 
     private var keroPlayer: MediaPlayer? = null
     private val client = OkHttpClient()
-    private val nodeApiBaseUrl = "http://10.11.246.191:3000"
+    private val nodeApiBaseUrl = "http://192.168.0.10:3000"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

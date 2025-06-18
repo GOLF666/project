@@ -25,7 +25,7 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var btnMic: ImageButton
 
     private val client = OkHttpClient()
-    private val nodeApiBaseUrl = "http://10.11.246.191:3000" // 模擬器用 10.0.2.2，真機用本機 IP
+    private val nodeApiBaseUrl = "http://192.168.0.10:3000" // 模擬器用 10.0.2.2，真機用本機 IP
     private val REQUEST_CODE_SPEECH_INPUT = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {

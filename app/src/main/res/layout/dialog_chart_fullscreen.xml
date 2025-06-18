@@ -1,26 +1,55 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="#FFFFFF">
 
-    <!-- 🔙 返回按鈕區域（48dp 高度）-->
-    <FrameLayout
+    <androidx.cardview.widget.CardView
+        android:id="@+id/title_card"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
-        android:padding="8dp">
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="28dp"
+        android:layout_marginTop="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="6dp"
+        android:backgroundTint="#E3F2FD">
 
-        <ImageButton
-            android:id="@+id/btnCloseDialog"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_gravity="end|center_vertical"
-            android:padding="4dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_arrow_back"
-            android:scaleType="fitCenter"
-            android:contentDescription="返回" />
-    </FrameLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp">
+
+            <!-- 📈 標題文字 -->
+            <TextView
+                android:id="@+id/title_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📈 健康指標趨勢圖"
+                android:textSize="26sp"
+                android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="#1565C0"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <!-- 🔙 返回按鈕 -->
+            <ImageButton
+                android:id="@+id/btnCloseDialog"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_arrow_back"
+                android:contentDescription="返回"
+                android:padding="6dp"
+                android:scaleType="fitCenter"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 
     <!-- 👤 個人資訊 -->
     <TextView

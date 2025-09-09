@@ -112,7 +112,7 @@ class ReportService : IntentService("ReportService") {
     private fun fetchBloodPressureDataAndFilter(): List<BloodPressureData> {
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url("http://172.20.10.8:3000/getBloodPressureData") // 替换为你的服务器 URL
+            .url("https://test-9wne.onrender.com/getBloodPressureData") // 替换为你的服务器 URL
             .build()
 
 

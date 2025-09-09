@@ -4,7 +4,9 @@ data class BLEParsedResult(
     val weight: Float,            // 體重 (公斤)
     val bmr: Int,                 // 基礎代謝率 (修正後 kcal)
     val impedance: Int,           // 生物電阻抗值
-    val rawData: String
+    val rawData: String,
+    val timestampMillis: Long = System.currentTimeMillis(), // ✅ 加入時間戳
+    val dataHash: Int = "$weight-$impedance".hashCode()     // ✅ 判斷資料唯一用
 )
 
 object BLEDataParser {

@@ -124,7 +124,7 @@ class MainActivity6 : AppCompatActivity() {
 
     private fun fetchAdviceFromServer(conditions: List<String>) {
         val encodedConditions = URLEncoder.encode(conditions.joinToString(","), StandardCharsets.UTF_8.name())
-        val url = "http://10.11.246.191:3000/get_exercises?conditions=$encodedConditions"
+        val url = "https://test-9wne.onrender.com/get_exercises?conditions=$encodedConditions"
 
         val request = Request.Builder().url(url).get().build()
 

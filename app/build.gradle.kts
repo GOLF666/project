@@ -277,4 +277,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.room:room-ktx:2.6.1")
 
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
+    implementation ("uk.co.samuelwall:material-tap-target-prompt:3.3.2")
+    implementation ("com.google.android.material:material:1.11.0")
 }

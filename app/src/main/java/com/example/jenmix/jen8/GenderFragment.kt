@@ -8,6 +8,7 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import com.example.jenmix.storage.UserPrefs
 import com.example.jenmix.R
 
 class GenderFragment(

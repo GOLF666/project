@@ -477,7 +477,7 @@ class SecondActivity : AppCompatActivity() {
     // 發送請求並處理回應
     private fun fetchWeightDataByDateRange(startDate: String, endDate: String) {
         val userId = 1 // 實際使用時動態帶入
-        val url = "http://10.11.246.191:3000/getFilteredWeightData?startDate=$startDate&endDate=$endDate&user_id=$userId"
+        val url = "https://test-9wne.onrender.com/getFilteredWeightData?startDate=$startDate&endDate=$endDate&user_id=$userId"
         val request = Request.Builder().url(url).build()
 
 
@@ -774,7 +774,7 @@ class SecondActivity : AppCompatActivity() {
             return
         }
 
-        val url = "http://10.11.246.191:3000/getFilteredBloodPressureData" +
+        val url = "https://test-9wne.onrender.com/getFilteredBloodPressureData" +
                 "?startDate=$startDate&endDate=$endDate&filter=$filterOption&username=$username"
 
         val request = Request.Builder()
@@ -867,7 +867,7 @@ class SecondActivity : AppCompatActivity() {
         }
 
         val url =
-            "http://10.11.246.191:3000/getBloodPressureByValue" +
+            "https://test-9wne.onrender.com/getBloodPressureByValue" +
                     "?type=$valueType&min=$lower&max=$upper&username=$username"
 
         val request = Request.Builder()

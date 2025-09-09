@@ -18,10 +18,13 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
-import java.util.concurrent.TimeUnit
 import com.example.jenmix.R
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.concurrent.TimeUnit
 
 class MainActivity4 : AppCompatActivity() {
 
@@ -38,21 +41,22 @@ class MainActivity4 : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main4)
 
-        // 請求通知權限（Android 13 以上版本）
+        // 通知權限
         requestNotificationPermission()
         reminderDao = AppDatabase4.getDatabase(this).generalReminderDao()
 
         username = getSharedPreferences("UserPrefs", MODE_PRIVATE)
             .getString("username", "") ?: ""
 
-        // 初始化介面元件
+        // UI
         val btnAddReminder: Button = findViewById(R.id.btnAddReminder)
         val rvReminders: RecyclerView = findViewById(R.id.rvReminders)
         spinnerCategory = findViewById(R.id.spinnerCategory)
 
+        // 載入本地資料
         lifecycleScope.launch {
-            val savedReminders = reminderDao.getAllByUsername(username)
-            reminderList.addAll(savedReminders.map {
+            val saved = reminderDao.getAllByUsername(username)
+            reminderList.addAll(saved.map {
                 Reminder(
                     id = it.id,
                     hour = it.hour,
@@ -67,41 +71,50 @@ class MainActivity4 : AppCompatActivity() {
             filterReminders()
         }
 
-        // 設定 RecyclerView 與 Adapter
+        // RecyclerView
         reminderAdapter = ReminderAdapter(
-            filteredList,
-            onReminderDelete = { reminder -> deleteReminder(reminder) },
-            onReminderTimeChanged = { reminder -> updateReminderTime(reminder) },
-            onReminderEdit = { reminder -> showAddReminderDialog(reminder) }
+            reminders = filteredList,
+            onReminderDelete = { reminder: Reminder -> deleteReminder(reminder) },
+            onReminderTimeChanged = { reminder: Reminder -> updateReminderTime(reminder) },
+            onReminderEdit = { reminder: Reminder -> showAddReminderDialog(reminder) }
         )
         rvReminders.layoutManager = LinearLayoutManager(this)
         rvReminders.adapter = reminderAdapter
 
-        // 設定上方類別篩選 Spinner（使用 enum 統一管理）
+        // 類別篩選
         val categories = Category.values().map { it.value }
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categories)
-        spinnerCategory.adapter = adapter
+        val spinnerAdapter =
+            ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, categories)
+        spinnerCategory.adapter = spinnerAdapter
         spinnerCategory.setSelection(0)
         spinnerCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parentView: AdapterView<*>?, view: View?, position: Int, id: Long) {
+            override fun onItemSelected(
+                parentView: AdapterView<*>?, view: View?, position: Int, id: Long
+            ) {
                 selectedCategory = categories[position]
                 filterReminders()
             }
+
             override fun onNothingSelected(parentView: AdapterView<*>?) {
                 selectedCategory = Category.ALL.value
                 filterReminders()
             }
         }
 
-        // 新增提醒按鈕點擊事件
+        // 新增
         btnAddReminder.setOnClickListener { showAddReminderDialog() }
     }
 
-    // 請求通知權限（Android 13+）
+    // 取今天 yyyy-MM-dd
+    private fun today(): String =
+        LocalDate.now(ZoneId.systemDefault()).format(DateTimeFormatter.ISO_LOCAL_DATE)
+
+    // 通知權限（Android 13+）
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
+                != PackageManager.PERMISSION_GRANTED
+            ) {
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
@@ -111,30 +124,32 @@ class MainActivity4 : AppCompatActivity() {
         }
     }
 
-    /**
-     * 顯示新增／修改提醒對話框
-     */
+    /** 新增/修改對話框 */
     private fun showAddReminderDialog(reminder: Reminder? = null) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_add_reminder4, null)
         val timePicker = dialogView.findViewById<TimePicker>(R.id.timePicker)
-        val spinnerCategoryDialog = dialogView.findViewById<MaterialAutoCompleteTextView>(R.id.spinnerCategory)
-        val spinnerDayOfWeek = dialogView.findViewById<MaterialAutoCompleteTextView>(R.id.spinnerDayOfWeek)
+        val spinnerCategoryDialog =
+            dialogView.findViewById<MaterialAutoCompleteTextView>(R.id.spinnerCategory)
+        val spinnerDayOfWeek =
+            dialogView.findViewById<MaterialAutoCompleteTextView>(R.id.spinnerDayOfWeek)
 
-        // 提醒類別（不包含吃藥）
-        val categories = arrayOf(Category.BLOOD_PRESSURE.value, Category.WEIGHT.value, Category.WATER.value, Category.OTHER.value)
-        spinnerCategoryDialog.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, categories))
+        val categories = arrayOf(
+            Category.BLOOD_PRESSURE.value,
+            Category.WEIGHT.value,
+            Category.WATER.value,
+            Category.OTHER.value
+        )
+        spinnerCategoryDialog.setAdapter(
+            ArrayAdapter(this, android.R.layout.simple_list_item_1, categories)
+        )
 
-        // 星期選擇 Spinner（第一項為每天）
         val days = arrayOf("每天", "周日", "周一", "周二", "周三", "周四", "周五", "周六")
         spinnerDayOfWeek.setAdapter(ArrayAdapter(this, android.R.layout.simple_list_item_1, days))
 
-        // 若為修改提醒則預填原有資料
         reminder?.let {
             timePicker.hour = it.hour
             timePicker.minute = it.minute
             spinnerCategoryDialog.setText(it.category, false)
-
-            // dayOfWeek 為 null 或 -1 表示「每天」
             val daySelection = when (it.dayOfWeek) {
                 null, -1 -> 0
                 0 -> 1
@@ -168,13 +183,10 @@ class MainActivity4 : AppCompatActivity() {
                     else -> null
                 }
 
-                // 這裡的提醒標題與內容固定
                 val titleText = "提醒時間到了"
                 val contentText = "請打開APP"
 
                 if (reminder == null) {
-                    Toast.makeText(this, "✅提醒已新增", Toast.LENGTH_SHORT).show()
-                    // 新增提醒，利用當前時間產生唯一 id
                     val newReminder = Reminder(
                         id = System.currentTimeMillis().toInt(),
                         hour = hour,
@@ -188,7 +200,6 @@ class MainActivity4 : AppCompatActivity() {
                     reminderList.add(newReminder)
                     scheduleReminder(newReminder)
 
-                    // 🧠 同步儲存到 Room 資料庫
                     lifecycleScope.launch {
                         reminderDao.insert(
                             GeneralReminderEntity(
@@ -204,8 +215,8 @@ class MainActivity4 : AppCompatActivity() {
                             )
                         )
                     }
+                    Toast.makeText(this, "✅ 提醒已新增", Toast.LENGTH_SHORT).show()
                 } else {
-                    // 修改提醒時保留原有 id
                     val updatedReminder = reminder.copy(
                         hour = hour,
                         minute = minute,
@@ -214,6 +225,8 @@ class MainActivity4 : AppCompatActivity() {
                         title = titleText,
                         content = contentText
                     )
+                    val index = reminderList.indexOfFirst { it.id == reminder.id }
+                    if (index != -1) reminderList[index] = updatedReminder
 
                     lifecycleScope.launch {
                         reminderDao.insert(
@@ -230,12 +243,8 @@ class MainActivity4 : AppCompatActivity() {
                             )
                         )
                     }
-                    val index = reminderList.indexOfFirst { it.id == reminder.id }
-                    if (index != -1) {
-                        reminderList[index] = updatedReminder
-                    }
                     scheduleReminder(updatedReminder)
-                    Toast.makeText(this, "✏\uFE0F提醒已更新", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "✏️ 提醒已更新", Toast.LENGTH_SHORT).show()
                 }
                 filterReminders()
             }
@@ -243,16 +252,11 @@ class MainActivity4 : AppCompatActivity() {
             .show()
     }
 
-    /**
-     * 利用 WorkManager 安排提醒排程
-     */
+    /** 用 WorkManager 安排提醒 */
     private fun scheduleReminder(reminder: Reminder) {
         val nextTriggerTime = ReminderScheduler.calculateNextTriggerTime(reminder)
         val initialDelay = nextTriggerTime - System.currentTimeMillis()
-        if (initialDelay <= 0) {
-            // 若初始延遲時間非正數，則直接跳過
-            return
-        }
+        if (initialDelay <= 0) return
 
         val workData = workDataOf(
             "id" to reminder.id,
@@ -268,7 +272,6 @@ class MainActivity4 : AppCompatActivity() {
             .setInitialDelay(initialDelay, TimeUnit.MILLISECONDS)
             .build()
 
-        // 使用 reminder.id 產生獨一無二的工作名稱
         val uniqueWorkName = "reminder_${reminder.id}"
         WorkManager.getInstance(this).enqueueUniqueWork(
             uniqueWorkName,
@@ -280,13 +283,11 @@ class MainActivity4 : AppCompatActivity() {
     private fun deleteReminder(reminder: Reminder) {
         reminderList.removeAll { it.id == reminder.id }
         filterReminders()
-        Toast.makeText(this, "\uD83D\uDDD1\uFE0F提醒已刪除", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "🗑️ 提醒已刪除", Toast.LENGTH_SHORT).show()
         val uniqueWorkName = "reminder_${reminder.id}"
         WorkManager.getInstance(this).cancelUniqueWork(uniqueWorkName)
 
-        lifecycleScope.launch {
-            reminderDao.deleteByIdAndUsername(reminder.id, username)
-        }
+        lifecycleScope.launch { reminderDao.deleteByIdAndUsername(reminder.id, username) }
     }
 
     private fun updateReminderTime(reminder: Reminder) {
@@ -297,22 +298,18 @@ class MainActivity4 : AppCompatActivity() {
     private fun filterReminders() {
         filteredList.clear()
         filteredList.addAll(
-            if (selectedCategory == Category.ALL.value) {
-                reminderList
-            } else {
-                reminderList.filter { it.category == selectedCategory }
-            }
+            if (selectedCategory == Category.ALL.value) reminderList
+            else reminderList.filter { it.category == selectedCategory }
         )
         reminderAdapter.notifyDataSetChanged()
     }
 
-    // 利用 enum 統一管理提醒類別（不含吃藥）
+    // 不含吃藥
     enum class Category(val value: String) {
         ALL("全部"),
         BLOOD_PRESSURE("測量血壓"),
         WEIGHT("測量體重"),
         WATER("喝水"),
-        MEDICATION("吃藥"),
         OTHER("其他")
     }
 

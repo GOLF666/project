@@ -41,6 +41,7 @@ class MainActivity9 : AppCompatActivity() {
         val reminderListLayout = findViewById<LinearLayout>(R.id.reminderListLayout)
         val tvReminderListTitle = findViewById<TextView>(R.id.tvReminderListTitle)
 
+        // 讀出該使用者的行程
         lifecycleScope.launch {
             val reminders = reminderDao.getRemindersByUsername(username)
             for (reminder in reminders) {
@@ -58,21 +59,24 @@ class MainActivity9 : AppCompatActivity() {
             }
         }
 
+        // 日期 + 時間選擇
         btnPickDate.setOnClickListener {
             val now = Calendar.getInstance()
             DatePickerDialog(this, { _, y, m, d ->
                 TimePickerDialog(this, { _, h, min ->
                     val cal = Calendar.getInstance()
-                    cal.set(y, m, d, h, min)
+                    cal.set(y, m, d, h, min, 0)
+                    cal.set(Calendar.MILLISECOND, 0)
                     selectedTimeInMillis = cal.timeInMillis
 
-                    val selectedText = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(cal.time)
+                    val selectedText =
+                        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(cal.time)
                     Toast.makeText(this, "已選擇 $selectedText", Toast.LENGTH_SHORT).show()
-
                 }, now.get(Calendar.HOUR_OF_DAY), now.get(Calendar.MINUTE), true).show()
             }, now.get(Calendar.YEAR), now.get(Calendar.MONTH), now.get(Calendar.DAY_OF_MONTH)).show()
         }
 
+        // 儲存行程（手動建立）
         btnSave.setOnClickListener {
             val title = etTitle.text.toString().trim()
             val location = etLocation.text.toString().trim()
@@ -87,6 +91,7 @@ class MainActivity9 : AppCompatActivity() {
             val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
             val appointmentTime = sdf.format(Date(selectedTimeInMillis))
 
+            // 前一天中午提醒
             val calDayBefore = Calendar.getInstance().apply {
                 timeInMillis = selectedTimeInMillis
                 add(Calendar.DAY_OF_MONTH, -1)
@@ -100,6 +105,7 @@ class MainActivity9 : AppCompatActivity() {
                 scheduleReminder(applicationContext, oneDayBeforeTime, "$title（前一天提醒）", location)
             }
 
+            // 當日上午 8 點提醒
             val calMorning = Calendar.getInstance().apply {
                 timeInMillis = selectedTimeInMillis
                 set(Calendar.HOUR_OF_DAY, 8)
@@ -133,7 +139,7 @@ class MainActivity9 : AppCompatActivity() {
                 }
                 reminderDao.insert(
                     ReminderEntity(
-                        username = username, // ✅ 加這行
+                        username = username,
                         title = title,
                         location = location,
                         department = department,
@@ -141,6 +147,8 @@ class MainActivity9 : AppCompatActivity() {
                         timeInMillis = thisReminderTime
                     )
                 )
+
+                // 重新渲染列表
                 reminderListLayout.removeAllViews()
                 val newList = reminderDao.getRemindersByUsername(username)
                 for (r in newList) {
@@ -157,7 +165,7 @@ class MainActivity9 : AppCompatActivity() {
     }
 
     private fun addReminderCard(
-        username: String, // ✅ 加上這個參數
+        username: String,
         title: String,
         location: String,
         department: String,
@@ -214,6 +222,7 @@ class MainActivity9 : AppCompatActivity() {
         layout.visibility = View.VISIBLE
     }
 
+    /** 建立排程通知（你原本的工具） */
     private fun scheduleReminder(context: Context, timeInMillis: Long, title: String, location: String) {
         val intent = Intent(context, ReminderReceiver::class.java).apply {
             putExtra("title", title)
@@ -255,5 +264,14 @@ class MainActivity9 : AppCompatActivity() {
         )
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManager.cancel(pendingIntent)
+    }
+
+    /** 今天 yyyy-MM-dd */
+    private fun today(): String {
+        val c = Calendar.getInstance()
+        val y = c.get(Calendar.YEAR)
+        val m = c.get(Calendar.MONTH) + 1
+        val d = c.get(Calendar.DAY_OF_MONTH)
+        return String.format("%04d-%02d-%02d", y, m, d)
     }
 }

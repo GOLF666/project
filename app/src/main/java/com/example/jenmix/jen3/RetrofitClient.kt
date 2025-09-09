@@ -5,7 +5,7 @@ import kotlin.jvm.java
 
 object RetrofitClient {
     // 使用模擬器時，10.0.2.2 代表主機的 localhost
-    private const val BASE_URL = "http://10.11.246.191:3000/"
+    private const val BASE_URL = "https://test-9wne.onrender.com/"
 
     val apiService: ApiService by lazy {
         Retrofit.Builder()

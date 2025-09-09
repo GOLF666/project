@@ -9,6 +9,7 @@ import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import com.example.jenmix.storage.UserPrefs
 import com.example.jenmix.R
 
 class AgeFragment(

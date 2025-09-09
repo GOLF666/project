@@ -1,53 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAFA">
+    android:background="#FAFAFA"
+    android:fitsSystemWindows="true">
 
-
-
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    <!-- 可捲動內容：把 bottomPanel 放進來當最後一張卡片 -->
+    <ScrollView
+        android:id="@+id/contentScroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="16dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="16dp"
         android:clipToPadding="false"
         android:background="#FAFAFA"
-        android:paddingBottom="140dp">
+        android:paddingBottom="120dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- 新增主標題 -->
+            <!-- 主標題 -->
             <TextView
                 android:id="@+id/titleMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="健康功能總覽"
-                android:textSize="25sp"
+                android:textSize="24sp"
                 android:textStyle="bold"
                 android:textColor="#212121"
                 android:gravity="center"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="4dp"
                 android:layout_marginBottom="12dp"
-                android:letterSpacing="0.05" />
+                android:letterSpacing="0.03" />
 
             <View
-                android:layout_width="60dp"
-                android:layout_height="2dp"
+                android:layout_width="72dp"
+                android:layout_height="3dp"
                 android:layout_gravity="center_horizontal"
                 android:background="#26C6DA"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginBottom="16dp"/>
 
+            <!-- 功能卡片外框 -->
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:background="@drawable/bg_feature_card"
-                android:elevation="4dp"
+                android:elevation="8dp"
                 android:padding="16dp">
 
+                <!-- 功能網格 -->
                 <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -74,8 +81,10 @@
                             android:scaleType="centerInside"
                             android:adjustViewBounds="true"
                             android:elevation="6dp"
+                            android:padding="16dp"
                             android:contentDescription="胡的頁面"
-                            android:padding="16dp" />
+                            android:foreground="?attr/selectableItemBackgroundBorderless" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -84,10 +93,10 @@
                             android:textColor="#333333"
                             android:layout_marginTop="8dp"
                             android:textStyle="bold"
-                            android:letterSpacing="0.05" />
+                            android:letterSpacing="0.02" />
                     </LinearLayout>
 
-                    <!-- 醫院掛號 -->
+                    <!-- 體重分析 -->
                     <LinearLayout
                         android:orientation="vertical"
                         android:gravity="center"
@@ -105,8 +114,10 @@
                             android:scaleType="centerInside"
                             android:adjustViewBounds="true"
                             android:elevation="6dp"
+                            android:padding="16dp"
                             android:contentDescription="體重"
-                            android:padding="16dp" />
+                            android:foreground="?attr/selectableItemBackgroundBorderless" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -115,7 +126,7 @@
                             android:textColor="#333333"
                             android:layout_marginTop="8dp"
                             android:textStyle="bold"
-                            android:letterSpacing="0.05" />
+                            android:letterSpacing="0.02" />
                     </LinearLayout>
 
                     <!-- 健康分析 -->
@@ -136,8 +147,9 @@
                             android:scaleType="centerInside"
                             android:adjustViewBounds="true"
                             android:elevation="6dp"
+                            android:padding="16dp"
                             android:contentDescription="健康分析"
-                            android:padding="16dp" />
+                            android:foreground="?attr/selectableItemBackgroundBorderless" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -147,7 +159,7 @@
                             android:textColor="#333333"
                             android:layout_marginTop="8dp"
                             android:textStyle="bold"
-                            android:letterSpacing="0.05" />
+                            android:letterSpacing="0.02" />
                     </LinearLayout>
 
                     <!-- 運動建議 -->
@@ -168,8 +180,10 @@
                             android:scaleType="centerInside"
                             android:adjustViewBounds="true"
                             android:elevation="6dp"
+                            android:padding="16dp"
                             android:contentDescription="運動建議"
-                            android:padding="16dp" />
+                            android:foreground="?attr/selectableItemBackgroundBorderless" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -178,7 +192,7 @@
                             android:textColor="#333333"
                             android:layout_marginTop="8dp"
                             android:textStyle="bold"
-                            android:letterSpacing="0.05" />
+                            android:letterSpacing="0.02" />
                     </LinearLayout>
 
                     <!-- 健康教學 -->
@@ -199,8 +213,10 @@
                             android:scaleType="centerInside"
                             android:adjustViewBounds="true"
                             android:elevation="6dp"
+                            android:padding="16dp"
                             android:contentDescription="健康教學"
-                            android:padding="16dp" />
+                            android:foreground="?attr/selectableItemBackgroundBorderless" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -209,7 +225,7 @@
                             android:textColor="#333333"
                             android:layout_marginTop="8dp"
                             android:textStyle="bold"
-                            android:letterSpacing="0.05" />
+                            android:letterSpacing="0.02" />
                     </LinearLayout>
 
                     <!-- 醫院掛號 -->
@@ -230,8 +246,10 @@
                             android:scaleType="centerInside"
                             android:adjustViewBounds="true"
                             android:elevation="6dp"
+                            android:padding="16dp"
                             android:contentDescription="醫院掛號"
-                            android:padding="16dp" />
+                            android:foreground="?attr/selectableItemBackgroundBorderless" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -240,7 +258,7 @@
                             android:textColor="#333333"
                             android:layout_marginTop="8dp"
                             android:textStyle="bold"
-                            android:letterSpacing="0.05" />
+                            android:letterSpacing="0.02" />
                     </LinearLayout>
 
                     <!-- 就醫行事曆 -->
@@ -261,8 +279,10 @@
                             android:scaleType="centerInside"
                             android:adjustViewBounds="true"
                             android:elevation="6dp"
+                            android:padding="16dp"
                             android:contentDescription="就醫行事曆"
-                            android:padding="16dp" />
+                            android:foreground="?attr/selectableItemBackgroundBorderless" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -271,7 +291,7 @@
                             android:textColor="#333333"
                             android:layout_marginTop="8dp"
                             android:textStyle="bold"
-                            android:letterSpacing="0.05" />
+                            android:letterSpacing="0.02" />
                     </LinearLayout>
 
                     <!-- 藥物提醒 -->
@@ -292,8 +312,10 @@
                             android:scaleType="centerInside"
                             android:adjustViewBounds="true"
                             android:elevation="6dp"
+                            android:padding="16dp"
                             android:contentDescription="藥物提醒"
-                            android:padding="16dp" />
+                            android:foreground="?attr/selectableItemBackgroundBorderless" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -302,7 +324,7 @@
                             android:textColor="#333333"
                             android:layout_marginTop="8dp"
                             android:textStyle="bold"
-                            android:letterSpacing="0.05" />
+                            android:letterSpacing="0.02" />
                     </LinearLayout>
 
                     <!-- 其他提醒 -->
@@ -323,8 +345,10 @@
                             android:scaleType="centerInside"
                             android:adjustViewBounds="true"
                             android:elevation="6dp"
+                            android:padding="16dp"
                             android:contentDescription="其他提醒"
-                            android:padding="16dp" />
+                            android:foreground="?attr/selectableItemBackgroundBorderless" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -333,7 +357,7 @@
                             android:textColor="#333333"
                             android:layout_marginTop="8dp"
                             android:textStyle="bold"
-                            android:letterSpacing="0.05" />
+                            android:letterSpacing="0.02" />
                     </LinearLayout>
 
                     <!-- 求助通知 -->
@@ -354,8 +378,10 @@
                             android:scaleType="centerInside"
                             android:adjustViewBounds="true"
                             android:elevation="6dp"
+                            android:padding="16dp"
                             android:contentDescription="求助通知"
-                            android:padding="16dp" />
+                            android:foreground="?attr/selectableItemBackgroundBorderless" />
+
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -364,7 +390,7 @@
                             android:textColor="#333333"
                             android:layout_marginTop="8dp"
                             android:textStyle="bold"
-                            android:letterSpacing="0.05" />
+                            android:letterSpacing="0.02" />
                     </LinearLayout>
 
                     <!-- 焦慮指數 -->
@@ -385,8 +411,9 @@
                             android:scaleType="centerInside"
                             android:adjustViewBounds="true"
                             android:elevation="6dp"
+                            android:padding="16dp"
                             android:contentDescription="焦慮指數"
-                            android:padding="16dp" />
+                            android:foreground="?attr/selectableItemBackgroundBorderless" />
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -396,81 +423,130 @@
                             android:textColor="#333333"
                             android:layout_marginTop="8dp"
                             android:textStyle="bold"
-                            android:letterSpacing="0.05" />
+                            android:letterSpacing="0.02" />
                     </LinearLayout>
-
 
                 </GridLayout>
             </FrameLayout>
+
+            <!-- ✅ 今日小叮嚀：作為內容最後一張卡片 -->
+            <LinearLayout
+                android:id="@+id/bottomPanel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="20dp"
+                android:background="@android:color/transparent"
+                android:gravity="center">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_quote_box"
+                    android:elevation="8dp"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="14dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/quoteTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="今日小叮嚀"
+                        android:textColor="#212121"
+                        android:textStyle="bold"
+                        android:textSize="20sp"
+                        android:layout_marginBottom="6dp" />
+
+                    <TextView
+                        android:id="@+id/quoteText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:textColor="#388E3C"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:gravity="center"
+                        android:maxLines="3"
+                        android:ellipsize="end" />
+                </LinearLayout>
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 
-    <!-- ✨ 提示語（固定在最底下青蛙上方） -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
+    <!-- 左下個人資訊 -->
+    <ImageButton
+        android:id="@+id/btnProfile"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
-        android:background="@drawable/bg_bottom_fade"
-        android:paddingTop="8dp"
-        android:paddingBottom="16dp"
-        android:gravity="center">
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_circle_button"
+        android:src="@drawable/ic_info"
+        android:scaleType="centerInside"
+        android:padding="10dp"
+        android:elevation="10dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="查看帳號" />
 
-        <!-- ✅ 將「今日小叮嚀」與語錄包進同一個區塊 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginHorizontal="24dp"
-            android:background="@drawable/bg_quote_box"
-            android:elevation="3dp"
-            android:padding="12dp"
-            android:gravity="center">
+    <!-- 右下主助理鍵（沿用你的 frogButton id 與圖示） -->
+    <ImageButton
+        android:id="@+id/frogButton"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_circle_button"
+        android:src="@drawable/ai_chat"
+        android:scaleType="fitCenter"
+        android:padding="10dp"
+        android:elevation="10dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="AI 聊天機器人" />
 
-            <TextView
-                android:id="@+id/quoteTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="今日小叮嚀"
-                android:textColor="#212121"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:id="@+id/quoteText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:textColor="#388E3C"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:maxLines="1"
-                android:ellipsize="end" />
-        </LinearLayout>
+        <!-- ✅ 換成 ImageButton 才能播 GIF -->
+        <ImageButton
+            android:id="@+id/btnAiChat"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/bg_circle_button_small"
+            android:scaleType="centerInside"
+            android:padding="10dp"
+            android:visibility="gone"
+            android:layout_alignParentBottom="true"
+            android:layout_toStartOf="@id/frogButton"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="12dp"
+            android:contentDescription="AI 聊天"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:elevation="8dp"/>
 
         <ImageButton
-            android:id="@+id/frogButton"
-            android:layout_width="75dp"
-            android:layout_height="75dp"
-            android:src="@drawable/kero"
-            android:background="@drawable/bg_circle_shadow"
-            android:contentDescription="健康助手"
-            android:scaleType="fitCenter"
-            android:elevation="10dp"
-            android:layout_marginTop="10dp"/>
-
-        <TextView
-            android:id="@+id/frogHint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="點擊可詢問健康問題喲~🐸"
-            android:textSize="15sp"
-            android:textColor="@color/gray"
-            android:textStyle="bold"
-            android:letterSpacing="0.02"
-            android:padding="6dp"
-            android:layout_marginBottom="2dp"/>
-    </LinearLayout>
+            android:id="@+id/btnAiAutomation"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/bg_circle_button_small"
+            android:scaleType="centerInside"
+            android:padding="10dp"
+            android:contentDescription="AI 自動化"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:visibility="gone"
+            android:layout_above="@id/frogButton"
+            android:layout_alignEnd="@id/frogButton"
+            android:layout_marginEnd="0dp"
+            android:layout_marginBottom="12dp"
+            android:elevation="8dp"/>
 </RelativeLayout>

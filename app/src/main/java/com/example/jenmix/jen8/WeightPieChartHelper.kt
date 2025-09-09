@@ -1,53 +1,105 @@
 package com.example.jenmix.jen8
 
 import android.graphics.Color
+import com.example.jenmix.jen8.model.WeightRecordLocal
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
+import com.github.mikephil.charting.formatter.PercentFormatter
 
 object WeightPieChartHelper {
 
-    fun setupPieChart(chart: PieChart, records: List<WeightRecord>) {
+    // ✅ 顏色對應（外圈色）
+    private val zoneColors = mapOf(
+        "過輕" to Color.parseColor("#2196F3"),   // 藍
+        "正常" to Color.parseColor("#4CAF50"),   // 綠
+        "偏高/偏低" to Color.parseColor("#FFC107"),   // 黃
+        "過重" to Color.parseColor("#F44336")    // 紅
+    )
+
+    /**
+     * 設定圓餅圖並回傳 Map<String, Pair<次數, 百分比>>
+     */
+    fun setupPieChart(
+        chart: PieChart,
+        records: List<WeightRecordLocal>
+    ): Map<String, Pair<Int, Float>> {
+        if (records.isEmpty()) return emptyMap()
+
+        // 統計次數初始化
         val zoneCount = mutableMapOf(
-            "< 60kg" to 0,
-            "60-70kg" to 0,
-            "70-80kg" to 0,
-            "80kg+" to 0
+            "過輕" to 0,
+            "正常" to 0,
+            "偏高/偏低" to 0,
+            "過重" to 0
         )
 
+        // 📊 分類統計 BMI 狀態
         for (record in records) {
+            val heightM = record.height / 100.0
+            val min = 18.5 * heightM * heightM
+            val max = 24.0 * heightM * heightM
+            val weight = record.weight.toDouble()
+
             when {
-                record.weight < 60 -> zoneCount["< 60kg"] = zoneCount["< 60kg"]!! + 1
-                record.weight < 70 -> zoneCount["60-70kg"] = zoneCount["60-70kg"]!! + 1
-                record.weight < 80 -> zoneCount["70-80kg"] = zoneCount["70-80kg"]!! + 1
-                else -> zoneCount["80kg+"] = zoneCount["80kg+"]!! + 1
+                weight < min -> zoneCount["過輕"] = zoneCount["過輕"]!! + 1
+                weight <= max -> zoneCount["正常"] = zoneCount["正常"]!! + 1
+                weight <= max * 1.1 -> zoneCount["偏高/偏低"] = zoneCount["偏高/偏低"]!! + 1
+                else -> zoneCount["過重"] = zoneCount["過重"]!! + 1
             }
         }
 
-        val entries = zoneCount.map { PieEntry(it.value.toFloat(), it.key) }
+        val total = zoneCount.values.sum().coerceAtLeast(1) // 防除以 0
 
-        val dataSet = PieDataSet(entries, "體重分布").apply {
-            colors = listOf(
-                Color.parseColor("#FFCDD2"),
-                Color.parseColor("#90CAF9"),
-                Color.parseColor("#A5D6A7"),
-                Color.parseColor("#FFF59D")
-            )
+        // PieEntry 資料組裝
+        val entries = zoneCount
+            .filter { it.value > 0 }
+            .map { (label, count) ->
+                PieEntry(count.toFloat() / total, label)
+            }
+
+        // 🎨 設定資料集樣式
+        val dataSet = PieDataSet(entries, "").apply {
+            colors = entries.map { zoneColors[it.label] ?: Color.LTGRAY }
             valueTextSize = 14f
-            valueTextColor = Color.BLACK
+            valueTextColor = Color.DKGRAY
+            sliceSpace = 2f
+            yValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
+            xValuePosition = PieDataSet.ValuePosition.OUTSIDE_SLICE
+            valueLinePart1Length = 0.35f
+            valueLinePart2Length = 0.5f
+            valueLineColor = Color.DKGRAY
         }
 
+        val pieData = PieData(dataSet).apply {
+            setValueFormatter(PercentFormatter(chart))
+        }
+
+        // 🥧 設定 PieChart 本體樣式
         chart.apply {
-            data = PieData(dataSet)
+            data = pieData
             description.isEnabled = false
-            setEntryLabelColor(Color.BLACK)
             setUsePercentValues(true)
+            setExtraOffsets(20f, 0f, 20f, 20f)
             isDrawHoleEnabled = true
-            holeRadius = 40f
-            transparentCircleRadius = 45f
+            holeRadius = 32f
+            transparentCircleRadius = 36f
+            setDrawEntryLabels(true)
+            setEntryLabelColor(Color.DKGRAY)
+            setEntryLabelTextSize(14f)
+            legend.isEnabled = false
             animateY(1000)
             invalidate()
         }
+
+        // 回傳統計資料 Map
+        val percentMap = mutableMapOf<String, Pair<Int, Float>>()
+        zoneCount.forEach { (label, count) ->
+            val percent = (count.toFloat() / total) * 100f
+            percentMap[label] = Pair(count, percent)
+        }
+
+        return percentMap
     }
 }

@@ -434,7 +434,7 @@ class FourthActivity : AppCompatActivity() {
 
 
     private fun sendResultsToServer(totalScore: Int) {
-        val url = "http://10.11.246.191:3000/submit-anxiety-score"
+        val url = "https://test-9wne.onrender.com/submit-anxiety-score"
 
         // 取得 SharedPreferences 裡的 username
         val sharedPref = getSharedPreferences("UserPrefs", MODE_PRIVATE)
@@ -582,7 +582,7 @@ class FourthActivity : AppCompatActivity() {
             return
         }
 
-        val url = "http://10.11.246.191:3000/get-anxiety-scores?username=$username&startDate=$start&endDate=$end"
+        val url = "https://test-9wne.onrender.com/get-anxiety-scores?username=$username&startDate=$start&endDate=$end"
 
         val request = Request.Builder()
             .url(url)

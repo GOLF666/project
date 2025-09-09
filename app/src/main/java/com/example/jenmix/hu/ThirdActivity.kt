@@ -84,7 +84,7 @@ class ThirdActivity : AppCompatActivity() {
             .addFormDataPart("username", username)  // 傳 username 給後端
             .build()
 
-        val serverUrl = "http://10.11.246.191:3000/upload" // 你的伺服器路由
+        val serverUrl = "https://test-9wne.onrender.com/upload" // 你的伺服器路由
 
         val request = Request.Builder()
             .url(serverUrl)

@@ -98,6 +98,7 @@
             android:theme="@style/Theme.JenmixTime" />
 
         <activity android:name=".jen1.WebViewActivity" />
+        <activity android:name=".jen1.ChartActivity" />
 
         <!-- ✅ 運動建議 -->
         <activity
@@ -125,6 +126,9 @@
         <activity
             android:name=".jen8.HistoryActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".jen8.SettingsActivity" />
 
         <activity
             android:name=".jen9.MainActivity9"

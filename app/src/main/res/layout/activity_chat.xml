@@ -28,7 +28,7 @@
                 android:id="@+id/tvHeader"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="🐸 Kero健康助手"
+                android:text="心靈陪伴室 🌸"
                 android:textSize="26sp"
                 android:textStyle="bold"
                 android:fontFamily="sans-serif-medium"
@@ -49,15 +49,33 @@
         android:elevation="6dp"
         android:clipToPadding="false">
 
-        <TextView
-            android:id="@+id/tvMessages"
+        <!-- 📦 LinearLayout 包住多個 TextView -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text=""
-            android:textSize="16sp"
-            android:textColor="#333333"
-            android:lineSpacingExtra="8dp"
-            android:fontFamily="sans-serif-medium" />
+            android:orientation="vertical">
+
+            <!-- 歡迎語（只顯示一次） -->
+            <TextView
+                android:id="@+id/tvWelcome"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="跟我聊聊吧 💖 我是你的蛙蛙 Kero，呱～ 🐸"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:lineSpacingExtra="8dp"
+                android:fontFamily="sans-serif-medium"/>
+
+            <!-- 訊息區（真正放對話） -->
+            <TextView
+                android:id="@+id/tvMessages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:lineSpacingExtra="8dp"
+                android:fontFamily="sans-serif-medium"/>
+        </LinearLayout>
     </ScrollView>
 
     <!-- 📝 輸入框區塊 -->
@@ -82,7 +100,7 @@
             android:minHeight="62dp"
             android:src="@drawable/mic"
             android:contentDescription="語音輸入"
-            android:background="?attr/selectableItemBackgroundBorderless"
+            android:background="@drawable/bg_circle_button_small"
             android:scaleType="centerInside"
             android:padding="12dp"
             android:layout_marginEnd="8dp" />
@@ -94,7 +112,7 @@
             android:layout_height="wrap_content"
             android:minHeight="48dp"
             android:layout_weight="1"
-            android:hint="請問有什麼健康問題呢？🐸"
+            android:hint="要聊健康還是心情呀？🐸"
             android:background="@drawable/bg_edittext_rounded"
             android:paddingHorizontal="16dp"
             android:paddingVertical="10dp"

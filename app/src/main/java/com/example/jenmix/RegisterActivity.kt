@@ -85,6 +85,7 @@ class RegisterActivity : AppCompatActivity() {
                         if (response.isSuccessful && response.body() != null) {
                             val token = response.body()!!.token
                             AuthManager.saveToken(this@RegisterActivity, token)
+
                             // 註冊成功 → 進入胡
                             startActivity(Intent(this@RegisterActivity,MainMenuActivity::class.java))
                             finish()
